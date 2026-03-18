@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "698540357194",
+    "project_id": "farmassistant-54d84",
+    "storage_bucket": "farmassistant-54d84.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:698540357194:android:e3380e1e65a0cf6aa498b3",
+        "android_client_info": {
+          "package_name": "com.example.farm_assistant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuDtD5hSNQc7Hm8bGhu8goeYtOCR3Xr0I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
