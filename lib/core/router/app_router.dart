@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../constants/app_constants.dart';
 import '../di/injection.dart';
+import '../../features/admin/presentation/pages/admin_privacy_policy_page.dart';
 import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/presentation/cubit/forgot_password_cubit.dart';
@@ -13,6 +14,8 @@ import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/home/presentation/pages/home_shell_page.dart';
+import '../../features/profile/presentation/pages/privacy_policy_page.dart';
+import '../../features/profile/presentation/pages/settings_page.dart';
 import '../../features/robot/presentation/pages/robot_control_page.dart';
 
 class AppRouter {
@@ -36,7 +39,7 @@ class AppRouter {
           return isAdmin ? '/admin' : '/';
         }
 
-        if (location == '/admin' && !isAdmin) return '/';
+        if (location.startsWith('/admin') && !isAdmin) return '/';
         if (location == '/' && isAdmin) return '/admin';
         if (location == '/robot-control') return '/?tab=robot';
         return null;
@@ -76,9 +79,21 @@ class AppRouter {
           builder: (context, state) => const AdminDashboardPage(),
         ),
         GoRoute(
+          path: '/admin/privacy-policy',
+          builder: (context, state) => const AdminPrivacyPolicyPage(),
+        ),
+        GoRoute(
           path: '/robot-control',
           builder: (context, state) =>
               const RobotControlPage(showBackButton: true),
+        ),
+        GoRoute(
+          path: '/settings',
+          builder: (context, state) => const SettingsPage(),
+        ),
+        GoRoute(
+          path: '/privacy-policy',
+          builder: (context, state) => const PrivacyPolicyPage(),
         ),
       ],
     );

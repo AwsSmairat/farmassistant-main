@@ -27,7 +27,37 @@ class AdminDashboardPage extends StatelessWidget {
         ],
       ),
       body: const Center(
-        child: Text('لوحة التحكم'),
+        child: _AdminActions(),
+      ),
+    );
+  }
+}
+
+class _AdminActions extends StatelessWidget {
+  const _AdminActions();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ElevatedButton.icon(
+            onPressed: () => context.push('/admin/privacy-policy'),
+            icon: const Icon(Icons.privacy_tip_outlined),
+            label: const Text('التحكم بسياسة الخصوصية'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.textOnPrimary,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -23,7 +23,13 @@ import '../../features/home/domain/repositories/dashboard_repository.dart';
 import '../../features/home/domain/usecases/get_dashboard_data.dart';
 import '../../features/home/presentation/cubit/dashboard_cubit.dart';
 import '../../features/profile/domain/usecases/get_profile.dart';
+import '../../features/profile/domain/usecases/get_privacy_policy.dart';
+import '../../features/profile/domain/usecases/save_privacy_policy.dart';
 import '../../features/profile/domain/usecases/update_profile.dart';
+import '../../features/profile/data/datasources/privacy_policy_remote_datasource.dart';
+import '../../features/profile/data/repositories/privacy_policy_repository_impl.dart';
+import '../../features/profile/domain/repositories/privacy_policy_repository.dart';
+import '../../features/profile/presentation/cubit/privacy_policy_cubit.dart';
 import '../../features/profile/presentation/cubit/profile_cubit.dart';
 
 final getIt = GetIt.instance;
@@ -104,5 +110,25 @@ Future<void> setupInjection() async {
       ));
   getIt.registerFactory<ProfileCubit>(
     () => ProfileCubit(getIt<GetProfile>(), getIt<UpdateProfile>()),
+  );
+
+  // Privacy policy
+  getIt.registerLazySingleton<PrivacyPolicyRemoteDatasource>(
+    () => PrivacyPolicyRemoteDatasource(),
+  );
+  getIt.registerLazySingleton<PrivacyPolicyRepository>(
+    () => PrivacyPolicyRepositoryImpl(getIt<PrivacyPolicyRemoteDatasource>()),
+  );
+  getIt.registerLazySingleton(
+    () => GetPrivacyPolicy(getIt<PrivacyPolicyRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => SavePrivacyPolicy(getIt<PrivacyPolicyRepository>()),
+  );
+  getIt.registerFactory<PrivacyPolicyCubit>(
+    () => PrivacyPolicyCubit(
+      getIt<GetPrivacyPolicy>(),
+      getIt<SavePrivacyPolicy>(),
+    ),
   );
 }

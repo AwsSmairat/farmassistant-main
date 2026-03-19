@@ -27,6 +27,10 @@ class ProfilePage extends StatelessWidget {
           title: const Text('الملف الشخصي'),
           actions: [
             IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: () => context.push('/settings'),
+            ),
+            IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () async {
                 await getIt<SignOut>().call();
@@ -98,7 +102,8 @@ class _ProfileViewState extends State<_ProfileView> {
       );
       if (mounted) {
         setState(() => _picking = false);
-        final path = result?.files.singleOrNull?.path;
+        final hasFile = result != null && result.files.isNotEmpty;
+        final path = hasFile ? result.files.first.path : null;
         if (path != null && path.isNotEmpty) {
           setState(() => _pickedImage = File(path));
         }
