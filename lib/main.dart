@@ -23,6 +23,10 @@ class FarmAssistantApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'Farm Assistant',
       theme: AppTheme.dark,
+      builder: (context, child) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: child!,
+      ),
       routerConfig: AppRouter.create(),
     );
   }

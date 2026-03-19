@@ -20,6 +20,12 @@ abstract class AuthRepository {
     required String password,
   });
 
+  /// Send email verification to the current user. No-op if no user.
+  Future<void> sendEmailVerification();
+
+  /// Deletes the current user (e.g. after sign-up if profile creation fails).
+  Future<void> deleteCurrentUser();
+
   /// Send password reset email to [email].
   Future<void> sendPasswordResetEmail(String email);
 

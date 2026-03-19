@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../constants/app_constants.dart';
 import '../di/injection.dart';
+import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
-import '../../features/auth/domain/usecases/sign_out.dart';
 import '../../features/auth/presentation/cubit/forgot_password_cubit.dart';
 import '../../features/auth/presentation/cubit/login_cubit.dart';
 import '../../features/auth/presentation/cubit/signup_cubit.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
-import '../theme/app_colors.dart';
+import '../../features/home/presentation/pages/home_shell_page.dart';
+import '../../features/robot/presentation/pages/robot_control_page.dart';
 
 class AppRouter {
   AppRouter._();
@@ -23,8 +25,20 @@ class AppRouter {
         final user = getIt<AuthRepository>().currentUser;
         final location = state.matchedLocation;
         final isAuthRoute = location == '/login' || location == '/signup' || location == '/forgot-password';
-        if (user == null && !isAuthRoute) return '/login';
-        if (user != null && isAuthRoute) return '/';
+        final isAdmin = AppConstants.isAdminEmail(user?.email);
+
+        if (user == null) {
+          if (!isAuthRoute) return '/login';
+          return null;
+        }
+
+        if (isAuthRoute) {
+          return isAdmin ? '/admin' : '/';
+        }
+
+        if (location == '/admin' && !isAdmin) return '/';
+        if (location == '/' && isAdmin) return '/admin';
+        if (location == '/robot-control') return '/?tab=robot';
         return null;
       },
       routes: [
@@ -51,36 +65,37 @@ class AppRouter {
         ),
         GoRoute(
           path: '/',
-          builder: (context, state) => const _PlaceholderHome(),
+          builder: (context, state) {
+            final tab = state.uri.queryParameters['tab'];
+            final index = AppRouter._tabToIndex(tab);
+            return HomeShellPage(initialIndex: index);
+          },
+        ),
+        GoRoute(
+          path: '/admin',
+          builder: (context, state) => const AdminDashboardPage(),
+        ),
+        GoRoute(
+          path: '/robot-control',
+          builder: (context, state) =>
+              const RobotControlPage(showBackButton: true),
         ),
       ],
     );
   }
-}
 
-class _PlaceholderHome extends StatelessWidget {
-  const _PlaceholderHome();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('مرحباً، تم تسجيل الدخول'),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: () async {
-                await getIt<SignOut>().call();
-                if (context.mounted) context.go('/login');
-              },
-              child: const Text('تسجيل الخروج والعودة لتسجيل الدخول'),
-            ),
-          ],
-        ),
-      ),
-    );
+  static int _tabToIndex(String? tab) {
+    switch (tab) {
+      case 'robot':
+        return 1;
+      case 'sensors':
+        return 2;
+      case 'alerts':
+        return 3;
+      case 'profile':
+        return 4;
+      default:
+        return 0;
+    }
   }
 }

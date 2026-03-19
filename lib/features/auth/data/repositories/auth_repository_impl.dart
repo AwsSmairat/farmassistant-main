@@ -31,6 +31,13 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
   @override
+  Future<void> sendEmailVerification() =>
+      _datasource.sendEmailVerification();
+
+  @override
+  Future<void> deleteCurrentUser() => _datasource.deleteCurrentUser();
+
+  @override
   Future<void> sendPasswordResetEmail(String email) =>
       _datasource.sendPasswordResetEmail(email);
 

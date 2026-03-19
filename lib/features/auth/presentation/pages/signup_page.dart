@@ -24,12 +24,16 @@ class _SignupView extends StatefulWidget {
 
 class _SignupViewState extends State<_SignupView> {
   final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
+    _usernameController.dispose();
+    _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -38,10 +42,37 @@ class _SignupViewState extends State<_SignupView> {
 
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
+    final phoneRaw = _phoneController.text.trim().replaceAll(RegExp(r'\s'), '');
+    final phone = phoneRaw.isEmpty ? '' : '+962$phoneRaw';
     context.read<SignupCubit>().createAccountWithEmail(
           email: _emailController.text.trim(),
           password: _passwordController.text,
+          username: _usernameController.text.trim(),
+          phone: phone,
         );
+  }
+
+  void _showVerificationDialog(BuildContext context, String email) {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('تأكيد البريد الإلكتروني'),
+        content: Text(
+          'أرسلنا بريداً إلى $email لتأكيد حسابك.\nاضغط على الرابط في البريد ثم افتح التطبيق للمتابعة والدخول.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              context.go('/');
+            },
+            child: const Text('حسناً'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -67,8 +98,9 @@ class _SignupViewState extends State<_SignupView> {
                 ),
               );
             }
-            if (state.status == SignupStatus.success) {
-              context.go('/');
+            if (state.status == SignupStatus.success && state.user != null) {
+              final email = state.user!.email ?? _emailController.text.trim();
+              _showVerificationDialog(context, email);
             }
           },
           builder: (context, state) {
@@ -80,6 +112,46 @@ class _SignupViewState extends State<_SignupView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    const SizedBox(height: 16),
+                    AppTextField(
+                      controller: _usernameController,
+                      label: 'اسم المستخدم',
+                      hint: 'username',
+                      prefixIcon: Icons.person_outline,
+                      textInputAction: TextInputAction.next,
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) return 'أدخل اسم المستخدم';
+                        if (v.trim().length < 2) return 'اسم المستخدم حرفين على الأقل';
+                        return null;
+                      },
+                      autofillHints: const [AutofillHints.username],
+                    ),
+                    const SizedBox(height: 16),
+                    AppTextField(
+                      controller: _phoneController,
+                      label: 'رقم الهاتف',
+                      hint: '7XXXXXXXX',
+                      prefixIcon: Icons.phone_outlined,
+                      prefix: const Text(
+                        '+962 ',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.next,
+                      validator: (v) {
+                        final s = (v ?? '').trim().replaceAll(RegExp(r'\s'), '');
+                        if (s.isEmpty) return 'أدخل رقم الهاتف';
+                        if (!s.startsWith('7')) return 'رقم الأردن يبدأ بـ 7 بعد +962';
+                        if (s.length != 9) return 'رقم غير صحيح (7 ثم 8 أرقام)';
+                        if (!RegExp(r'^7\d{8}$').hasMatch(s)) return 'أدخل 8 أرقام بعد 7';
+                        return null;
+                      },
+                      autofillHints: const [AutofillHints.telephoneNumber],
+                    ),
                     const SizedBox(height: 16),
                     AppTextField(
                       controller: _emailController,

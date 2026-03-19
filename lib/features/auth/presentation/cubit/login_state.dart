@@ -1,6 +1,6 @@
 part of 'login_cubit.dart';
 
-enum LoginStatus { initial, loading, success, failure }
+enum LoginStatus { initial, loading, success, failure, googleSignInNeedsProfile }
 
 class LoginState extends Equatable {
   const LoginState._({required this.status, this.user, this.message});
@@ -16,6 +16,10 @@ class LoginState extends Equatable {
 
   const LoginState.failure(String message)
       : this._(status: LoginStatus.failure, message: message);
+
+  /// Google sign-in succeeded but user has no profile; show dialog to complete.
+  const LoginState.googleSignInNeedsProfile(AuthUser user)
+      : this._(status: LoginStatus.googleSignInNeedsProfile, user: user);
 
   final LoginStatus status;
   final AuthUser? user;

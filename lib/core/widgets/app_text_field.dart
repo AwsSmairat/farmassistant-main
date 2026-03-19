@@ -10,6 +10,7 @@ class AppTextField extends StatefulWidget {
     this.label,
     this.hint,
     this.prefixIcon,
+    this.prefix,
     this.suffixIcon,
     this.obscureText = false,
     this.showObscureToggle = true,
@@ -27,6 +28,8 @@ class AppTextField extends StatefulWidget {
   final String? label;
   final String? hint;
   final IconData? prefixIcon;
+  /// Optional text/widget shown after [prefixIcon] (e.g. fixed phone prefix "+962 ").
+  final Widget? prefix;
   final Widget? suffixIcon;
   final bool obscureText;
   final bool showObscureToggle;
@@ -94,6 +97,7 @@ class _AppTextFieldState extends State<AppTextField> {
             prefixIcon: widget.prefixIcon != null
                 ? Icon(widget.prefixIcon, color: AppColors.textSecondary, size: 22)
                 : null,
+            prefix: widget.prefix,
             suffixIcon: showPasswordToggle
                 ? IconButton(
                     icon: Icon(

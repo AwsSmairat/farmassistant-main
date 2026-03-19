@@ -21,13 +21,21 @@ class SignupCubit extends Cubit<SignupState> {
   Future<void> createAccountWithEmail({
     required String email,
     required String password,
+    required String username,
+    required String phone,
   }) async {
     emit(const SignupState.loading());
     try {
-      final user = await _createAccountWithEmail(email: email, password: password);
+      final user = await _createAccountWithEmail(
+        email: email,
+        password: password,
+        username: username,
+        phone: phone,
+      );
       emit(SignupState.success(user));
     } catch (e, _) {
-      emit(SignupState.failure(e.toString()));
+      final message = e is Exception ? e.toString().replaceFirst('Exception: ', '') : e.toString();
+      emit(SignupState.failure(message));
     }
   }
 
