@@ -78,14 +78,14 @@ class _SignupViewState extends State<_SignupView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
+      appBar: LiquidGlassAppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimary),
           onPressed: () => context.pop(),
         ),
-        title: const Text('إنشاء حساب', style: TextStyle(color: AppColors.textPrimary)),
+        automaticallyImplyLeading: false,
+        title: const Text('إنشاء حساب'),
       ),
       body: SafeArea(
         child: BlocConsumer<SignupCubit, SignupState>(

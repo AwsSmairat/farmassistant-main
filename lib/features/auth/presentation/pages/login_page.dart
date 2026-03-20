@@ -135,7 +135,7 @@ class _LoginViewState extends State<_LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: BlocConsumer<LoginCubit, LoginState>(
           listener: (context, state) {
@@ -175,12 +175,10 @@ class _LoginViewState extends State<_LoginView> {
                       subtitle: 'بوابة آمنة لإدارة المزرعة',
                     ),
                     const SizedBox(height: 32),
-                    Container(
+                    LiquidGlassPanel(
+                      borderRadius: LiquidGlassTokens.radiusSm,
+                      blurSigma: LiquidGlassTokens.blurMedium,
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
                       child: const AppStatusIndicator(label: 'SYSTEM ONLINE'),
                     ),
                     const SizedBox(height: 28),

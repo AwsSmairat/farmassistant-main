@@ -40,14 +40,14 @@ class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
+      appBar: LiquidGlassAppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimary),
           onPressed: () => context.pop(),
         ),
-        title: const Text('استعادة كلمة المرور', style: TextStyle(color: AppColors.textPrimary)),
+        automaticallyImplyLeading: false,
+        title: const Text('استعادة كلمة المرور'),
       ),
       body: SafeArea(
         child: BlocConsumer<ForgotPasswordCubit, ForgotPasswordState>(

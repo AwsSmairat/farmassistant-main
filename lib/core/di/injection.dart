@@ -22,6 +22,15 @@ import '../../features/home/data/repositories/dashboard_repository_impl.dart';
 import '../../features/home/domain/repositories/dashboard_repository.dart';
 import '../../features/home/domain/usecases/get_dashboard_data.dart';
 import '../../features/home/presentation/cubit/dashboard_cubit.dart';
+import '../../features/notifications/data/datasources/notifications_remote_datasource.dart';
+import '../../features/notifications/data/datasources/notifications_remote_datasource_impl.dart';
+import '../../features/notifications/data/repositories/notifications_repository_impl.dart';
+import '../../features/notifications/domain/repositories/notifications_repository.dart';
+import '../../features/notifications/domain/usecases/clear_all_notifications.dart';
+import '../../features/notifications/domain/usecases/delete_notification.dart';
+import '../../features/notifications/domain/usecases/mark_notification_read.dart';
+import '../../features/notifications/domain/usecases/watch_notifications.dart';
+import '../../features/notifications/presentation/cubit/notifications_cubit.dart';
 import '../../features/profile/domain/usecases/get_profile.dart';
 import '../../features/profile/domain/usecases/get_privacy_policy.dart';
 import '../../features/profile/domain/usecases/save_privacy_policy.dart';
@@ -31,6 +40,12 @@ import '../../features/profile/data/repositories/privacy_policy_repository_impl.
 import '../../features/profile/domain/repositories/privacy_policy_repository.dart';
 import '../../features/profile/presentation/cubit/privacy_policy_cubit.dart';
 import '../../features/profile/presentation/cubit/profile_cubit.dart';
+import '../../features/sensors/data/datasources/sensors_remote_datasource.dart';
+import '../../features/sensors/data/datasources/sensors_remote_datasource_impl.dart';
+import '../../features/sensors/data/repositories/sensors_repository_impl.dart';
+import '../../features/sensors/domain/repositories/sensors_repository.dart';
+import '../../features/sensors/domain/usecases/watch_sensors_dashboard.dart';
+import '../../features/sensors/presentation/cubit/sensors_cubit.dart';
 
 final getIt = GetIt.instance;
 
@@ -99,6 +114,34 @@ Future<void> setupInjection() async {
     () => DashboardCubit(getIt<GetDashboardData>()),
   );
 
+  // Notifications
+  getIt.registerLazySingleton<NotificationsRemoteDatasource>(
+    () => NotificationsRemoteDatasourceImpl(),
+  );
+  getIt.registerLazySingleton<NotificationsRepository>(
+    () => NotificationsRepositoryImpl(getIt<NotificationsRemoteDatasource>()),
+  );
+  getIt.registerLazySingleton(
+    () => WatchNotifications(getIt<NotificationsRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => MarkNotificationRead(getIt<NotificationsRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => DeleteNotification(getIt<NotificationsRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => ClearAllNotifications(getIt<NotificationsRepository>()),
+  );
+  getIt.registerFactory(
+    () => NotificationsCubit(
+      getIt<WatchNotifications>(),
+      getIt<MarkNotificationRead>(),
+      getIt<DeleteNotification>(),
+      getIt<ClearAllNotifications>(),
+    ),
+  );
+
   // Profile
   getIt.registerLazySingleton(() => GetProfile(
         getIt<AuthRepository>(),
@@ -130,5 +173,19 @@ Future<void> setupInjection() async {
       getIt<GetPrivacyPolicy>(),
       getIt<SavePrivacyPolicy>(),
     ),
+  );
+
+  // Sensors dashboard
+  getIt.registerLazySingleton<SensorsRemoteDatasource>(
+    () => SensorsRemoteDatasourceImpl(),
+  );
+  getIt.registerLazySingleton<SensorsRepository>(
+    () => SensorsRepositoryImpl(getIt<SensorsRemoteDatasource>()),
+  );
+  getIt.registerLazySingleton(
+    () => WatchSensorsDashboard(getIt<SensorsRepository>()),
+  );
+  getIt.registerFactory<SensorsCubit>(
+    () => SensorsCubit(getIt<WatchSensorsDashboard>()),
   );
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../cubit/privacy_policy_cubit.dart';
 import '../cubit/privacy_policy_state.dart';
 
@@ -16,14 +17,14 @@ class PrivacyPolicyPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => getIt<PrivacyPolicyCubit>()..load(),
       child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.surface,
+        backgroundColor: Colors.transparent,
+        appBar: LiquidGlassAppBar(
           title: const Text('سياسة الخصوصية'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => context.pop(),
           ),
+          automaticallyImplyLeading: false,
         ),
         body: BlocBuilder<PrivacyPolicyCubit, PrivacyPolicyState>(
           builder: (context, state) {

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../../../auth/domain/usecases/sign_out.dart';
 
 /// Empty admin dashboard. Admin enters via email admainaws@admainq.com.
@@ -12,9 +13,8 @@ class AdminDashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
+      backgroundColor: Colors.transparent,
+      appBar: LiquidGlassAppBar(
         title: const Text('لوحة تحكم الأدمن'),
         actions: [
           IconButton(

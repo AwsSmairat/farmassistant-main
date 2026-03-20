@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../../../../core/widgets/app_action_card.dart';
 import '../../../../core/widgets/app_data_card.dart';
 import '../../../../core/widgets/app_header.dart';
@@ -29,9 +30,8 @@ class DashboardPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => getIt<DashboardCubit>()..load(),
       child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.surface,
+        backgroundColor: Colors.transparent,
+        appBar: LiquidGlassAppBar(
           title: const Text('الرئيسية'),
           actions: [
             IconButton(

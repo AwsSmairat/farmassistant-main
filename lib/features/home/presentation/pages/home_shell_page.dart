@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
+import '../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../robot/presentation/pages/robot_control_page.dart';
-import 'alerts_page.dart';
+import '../../../sensors/presentation/pages/sensors_page.dart';
 import 'dashboard_page.dart';
-import 'sensors_page.dart';
 
 /// Authenticated home shell: bottom nav with 5 tabs, IndexedStack to preserve state.
 class HomeShellPage extends StatefulWidget {
@@ -24,10 +25,34 @@ class _HomeShellPageState extends State<HomeShellPage> {
   late int _currentIndex;
 
   static const int _dashboardIndex = 0;
-  static const int _robotIndex = 1;
-  static const int _sensorsIndex = 2;
+  static const int _sensorsIndex = 1;
+  static const int _robotIndex = 2;
   static const int _alertsIndex = 3;
   static const int _profileIndex = 4;
+
+  BottomNavigationBarItem _buildNavItem({
+    required int index,
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+  }) {
+    final bool isSelected = _currentIndex == index;
+    return BottomNavigationBarItem(
+      icon: AnimatedSlide(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        offset: isSelected ? const Offset(0, -0.16) : Offset.zero,
+        child: Icon(icon),
+      ),
+      activeIcon: AnimatedSlide(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        offset: isSelected ? const Offset(0, -0.16) : Offset.zero,
+        child: Icon(activeIcon),
+      ),
+      label: label,
+    );
+  }
 
   @override
   void initState() {
@@ -46,7 +71,7 @@ class _HomeShellPageState extends State<HomeShellPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       body: IndexedStack(
         index: _currentIndex,
         children: [
@@ -54,46 +79,54 @@ class _HomeShellPageState extends State<HomeShellPage> {
             onNavigateToRobotControl: () =>
                 setState(() => _currentIndex = _robotIndex),
           ),
-          const RobotControlPage(showBackButton: false),
           const SensorsPage(),
-          const AlertsPage(),
+          const RobotControlPage(showBackButton: false),
+          const NotificationsPage(),
           const ProfilePage(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: AppColors.navBackground,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textSecondary,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
-            activeIcon: Icon(Icons.dashboard),
+      bottomNavigationBar: LiquidGlassBottomBar(
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) => setState(() => _currentIndex = index),
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedItemColor: AppColors.primary,
+          unselectedItemColor: AppColors.textSecondary,
+          items: [
+          _buildNavItem(
+            index: _dashboardIndex,
+            icon: Icons.dashboard_outlined,
+            activeIcon: Icons.dashboard,
             label: 'الرئيسية',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.smart_toy_outlined),
-            activeIcon: Icon(Icons.smart_toy),
-            label: 'الروبوت',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.sensors_outlined),
-            activeIcon: Icon(Icons.sensors),
+          _buildNavItem(
+            index: _sensorsIndex,
+            icon: Icons.sensors_outlined,
+            activeIcon: Icons.sensors,
             label: 'المستشعرات',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_outlined),
-            activeIcon: Icon(Icons.notifications),
+          _buildNavItem(
+            index: _robotIndex,
+            icon: Icons.smart_toy_outlined,
+            activeIcon: Icons.smart_toy,
+            label: 'الروبوت',
+          ),
+          _buildNavItem(
+            index: _alertsIndex,
+            icon: Icons.notifications_outlined,
+            activeIcon: Icons.notifications,
             label: 'التنبيهات',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
+          _buildNavItem(
+            index: _profileIndex,
+            icon: Icons.person_outline,
+            activeIcon: Icons.person,
             label: 'الملف',
           ),
         ],
+        ),
       ),
     );
   }

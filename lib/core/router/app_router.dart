@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -102,9 +101,9 @@ class AppRouter {
   static int _tabToIndex(String? tab) {
     switch (tab) {
       case 'robot':
-        return 1;
-      case 'sensors':
         return 2;
+      case 'sensors':
+        return 1;
       case 'alerts':
         return 3;
       case 'profile':

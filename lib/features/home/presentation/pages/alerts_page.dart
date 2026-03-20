@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 
 /// Alerts feature placeholder. Full UI to be implemented.
 class AlertsPage extends StatelessWidget {
@@ -9,9 +10,8 @@ class AlertsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
+      backgroundColor: Colors.transparent,
+      appBar: LiquidGlassAppBar(
         title: const Text('التنبيهات'),
       ),
       body: const Center(

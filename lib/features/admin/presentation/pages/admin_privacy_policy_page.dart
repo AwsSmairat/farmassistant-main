@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../../../profile/presentation/cubit/privacy_policy_cubit.dart';
 import '../../../profile/presentation/cubit/privacy_policy_state.dart';
 
@@ -30,10 +32,14 @@ class _AdminPrivacyPolicyPageState extends State<AdminPrivacyPolicyPage> {
     return BlocProvider(
       create: (_) => getIt<PrivacyPolicyCubit>()..load(),
       child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          backgroundColor: AppColors.surface,
+        backgroundColor: Colors.transparent,
+        appBar: LiquidGlassAppBar(
           title: const Text('إدارة سياسة الخصوصية'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.pop(),
+          ),
+          automaticallyImplyLeading: false,
         ),
         body: BlocConsumer<PrivacyPolicyCubit, PrivacyPolicyState>(
           listener: (context, state) {

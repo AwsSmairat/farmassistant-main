@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'core/di/injection.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/liquid_glass/liquid_glass.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -25,7 +26,7 @@ class FarmAssistantApp extends StatelessWidget {
       theme: AppTheme.dark,
       builder: (context, child) => Directionality(
         textDirection: TextDirection.rtl,
-        child: child!,
+        child: LiquidGlassAppBackground(child: child!),
       ),
       routerConfig: AppRouter.create(),
     );

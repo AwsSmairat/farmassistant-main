@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_colors.dart';
+import 'liquid_glass/liquid_glass.dart';
 
 /// Card for KPI/data: icon, label, value, optional trend (+2%, -5%) or status text.
 class AppDataCard extends StatelessWidget {
@@ -29,17 +31,19 @@ class AppDataCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
+      color: Colors.transparent,
+      child: LiquidGlassPanel(
+        borderRadius: LiquidGlassTokens.radiusSm,
+        blurSigma: LiquidGlassTokens.blurSoft,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(LiquidGlassTokens.radiusSm),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
               Row(
                 children: [
                   if (icon != null) ...[
@@ -93,7 +97,8 @@ class AppDataCard extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

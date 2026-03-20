@@ -8,7 +8,7 @@ abstract final class AppTheme {
   static ThemeData get dark => ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: AppColors.background,
+        scaffoldBackgroundColor: Colors.transparent,
         primaryColor: AppColors.primary,
         colorScheme: const ColorScheme.dark(
           primary: AppColors.primary,
@@ -22,13 +22,15 @@ abstract final class AppTheme {
           outline: AppColors.border,
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.background,
+          backgroundColor: Colors.transparent,
           foregroundColor: AppColors.textPrimary,
           elevation: 0,
+          scrolledUnderElevation: 0,
+          surfaceTintColor: Colors.transparent,
           centerTitle: true,
         ),
         cardTheme: CardThemeData(
-          color: AppColors.surface,
+          color: AppColors.surface.withValues(alpha: 0.35),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -36,7 +38,7 @@ abstract final class AppTheme {
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: AppColors.inputBackground,
+          fillColor: AppColors.inputBackground.withValues(alpha: 0.55),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -99,10 +101,11 @@ abstract final class AppTheme {
           ),
         ),
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: AppColors.navBackground,
+          backgroundColor: Colors.transparent,
           selectedItemColor: AppColors.primary,
           unselectedItemColor: AppColors.textSecondary,
           type: BottomNavigationBarType.fixed,
+          elevation: 0,
         ),
         textTheme: _textTheme,
       );

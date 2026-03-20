@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../../auth/domain/usecases/send_password_reset.dart';
 
@@ -70,14 +71,14 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
+      backgroundColor: Colors.transparent,
+      appBar: LiquidGlassAppBar(
         title: const Text('الإعدادات'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
+        automaticallyImplyLeading: false,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -105,17 +106,21 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: () => context.push('/privacy-policy'),
-              icon: const Icon(Icons.privacy_tip_outlined),
-              label: const Text('سياسة الخصوصية'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: const BorderSide(color: AppColors.border),
-                backgroundColor: AppColors.surface,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            LiquidGlassPanel(
+              borderRadius: LiquidGlassTokens.radiusSm,
+              blurSigma: LiquidGlassTokens.blurSoft,
+              child: OutlinedButton.icon(
+                onPressed: () => context.push('/privacy-policy'),
+                icon: const Icon(Icons.privacy_tip_outlined),
+                label: const Text('سياسة الخصوصية'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.textPrimary,
+                  side: BorderSide(color: AppColors.border.withValues(alpha: 0.65)),
+                  backgroundColor: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(LiquidGlassTokens.radiusSm),
+                  ),
                 ),
               ),
             ),
