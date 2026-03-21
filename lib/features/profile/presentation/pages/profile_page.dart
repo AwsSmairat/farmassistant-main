@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/storage/profile_local_avatar_store.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../../../auth/domain/usecases/sign_out.dart';
@@ -92,6 +93,28 @@ class _ProfileViewState extends State<_ProfileView> {
   File? _pickedImage;
   bool _picking = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _restoreLocalAvatar();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ProfileView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.profile.uid != widget.profile.uid) {
+      _pickedImage = null;
+      _restoreLocalAvatar();
+    }
+  }
+
+  Future<void> _restoreLocalAvatar() async {
+    final file = await ProfileLocalAvatarStore.loadIfExists(widget.profile.uid);
+    if (mounted && file != null) {
+      setState(() => _pickedImage = file);
+    }
+  }
+
   Future<void> _pickImage() async {
     if (_picking) return;
     setState(() => _picking = true);
@@ -100,14 +123,25 @@ class _ProfileViewState extends State<_ProfileView> {
         type: FileType.image,
         allowMultiple: false,
       );
-      if (mounted) {
-        setState(() => _picking = false);
-        final hasFile = result != null && result.files.isNotEmpty;
-        final path = hasFile ? result.files.first.path : null;
-        if (path != null && path.isNotEmpty) {
-          setState(() => _pickedImage = File(path));
-        }
+      if (!mounted) return;
+
+      final picked = result != null && result.files.isNotEmpty
+          ? result.files.first
+          : null;
+      File? stored;
+      if (picked != null) {
+        stored = await ProfileLocalAvatarStore.persistPick(
+          widget.profile.uid,
+          path: picked.path,
+          bytes: picked.bytes,
+        );
       }
+
+      if (!mounted) return;
+      setState(() {
+        _picking = false;
+        if (stored != null) _pickedImage = stored;
+      });
     } catch (_) {
       if (mounted) {
         setState(() => _picking = false);

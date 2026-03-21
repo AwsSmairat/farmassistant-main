@@ -50,6 +50,7 @@ dependencies:
 
   # File/image picker for profile photo
   file_picker: ^8.0.0
+  path_provider: ^2.1.5
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
 

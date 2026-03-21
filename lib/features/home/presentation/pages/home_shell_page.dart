@@ -24,35 +24,7 @@ class HomeShellPage extends StatefulWidget {
 class _HomeShellPageState extends State<HomeShellPage> {
   late int _currentIndex;
 
-  static const int _dashboardIndex = 0;
-  static const int _sensorsIndex = 1;
-  static const int _robotIndex = 2;
-  static const int _alertsIndex = 3;
-  static const int _profileIndex = 4;
-
-  BottomNavigationBarItem _buildNavItem({
-    required int index,
-    required IconData icon,
-    required IconData activeIcon,
-    required String label,
-  }) {
-    final bool isSelected = _currentIndex == index;
-    return BottomNavigationBarItem(
-      icon: AnimatedSlide(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOut,
-        offset: isSelected ? const Offset(0, -0.16) : Offset.zero,
-        child: Icon(icon),
-      ),
-      activeIcon: AnimatedSlide(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOut,
-        offset: isSelected ? const Offset(0, -0.16) : Offset.zero,
-        child: Icon(activeIcon),
-      ),
-      label: label,
-    );
-  }
+  static const int _robotTabIndex = 2;
 
   @override
   void initState() {
@@ -77,7 +49,7 @@ class _HomeShellPageState extends State<HomeShellPage> {
         children: [
           DashboardPage(
             onNavigateToRobotControl: () =>
-                setState(() => _currentIndex = _robotIndex),
+                setState(() => _currentIndex = _robotTabIndex),
           ),
           const SensorsPage(),
           const RobotControlPage(showBackButton: false),
@@ -86,46 +58,38 @@ class _HomeShellPageState extends State<HomeShellPage> {
         ],
       ),
       bottomNavigationBar: LiquidGlassBottomBar(
-        child: BottomNavigationBar(
+        child: LiquidGlassNavBar(
           currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          selectedItemColor: AppColors.primary,
-          unselectedItemColor: AppColors.textSecondary,
-          items: [
-          _buildNavItem(
-            index: _dashboardIndex,
-            icon: Icons.dashboard_outlined,
-            activeIcon: Icons.dashboard,
-            label: 'الرئيسية',
-          ),
-          _buildNavItem(
-            index: _sensorsIndex,
-            icon: Icons.sensors_outlined,
-            activeIcon: Icons.sensors,
-            label: 'المستشعرات',
-          ),
-          _buildNavItem(
-            index: _robotIndex,
-            icon: Icons.smart_toy_outlined,
-            activeIcon: Icons.smart_toy,
-            label: 'الروبوت',
-          ),
-          _buildNavItem(
-            index: _alertsIndex,
-            icon: Icons.notifications_outlined,
-            activeIcon: Icons.notifications,
-            label: 'التنبيهات',
-          ),
-          _buildNavItem(
-            index: _profileIndex,
-            icon: Icons.person_outline,
-            activeIcon: Icons.person,
-            label: 'الملف',
-          ),
-        ],
+          onDestinationSelected: (index) => setState(() => _currentIndex = index),
+          selectedColor: AppColors.primary,
+          unselectedColor: AppColors.textSecondary,
+          destinations: const [
+            LiquidGlassNavDestination(
+              icon: Icons.dashboard_outlined,
+              activeIcon: Icons.dashboard,
+              label: 'الرئيسية',
+            ),
+            LiquidGlassNavDestination(
+              icon: Icons.sensors_outlined,
+              activeIcon: Icons.sensors,
+              label: 'المستشعرات',
+            ),
+            LiquidGlassNavDestination(
+              icon: Icons.smart_toy_outlined,
+              activeIcon: Icons.smart_toy,
+              label: 'الروبوت',
+            ),
+            LiquidGlassNavDestination(
+              icon: Icons.notifications_outlined,
+              activeIcon: Icons.notifications,
+              label: 'التنبيهات',
+            ),
+            LiquidGlassNavDestination(
+              icon: Icons.person_outline,
+              activeIcon: Icons.person,
+              label: 'الملف',
+            ),
+          ],
         ),
       ),
     );

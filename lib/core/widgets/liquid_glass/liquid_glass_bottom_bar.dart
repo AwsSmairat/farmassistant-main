@@ -44,15 +44,7 @@ class LiquidGlassBottomBar extends StatelessWidget {
               ),
             ],
           ),
-          child: Theme(
-            data: Theme.of(context).copyWith(
-              bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-              ),
-            ),
-            child: child,
-          ),
+          child: child,
         ),
       ),
     );
