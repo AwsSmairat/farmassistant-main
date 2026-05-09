@@ -1,5 +1,3 @@
-import 'package:equatable/equatable.dart';
-
 /// Robot connection/status for dashboard.
 enum RobotStatus {
   online,

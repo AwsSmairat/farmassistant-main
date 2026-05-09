@@ -8,7 +8,7 @@ import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../cubit/privacy_policy_cubit.dart';
 import '../cubit/privacy_policy_state.dart';
 
-/// User-facing privacy policy page (reads content saved by admin).
+/// User-facing privacy policy page.
 class PrivacyPolicyPage extends StatelessWidget {
   const PrivacyPolicyPage({super.key});
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
 /// App header: optional logo, title (with optional accent part), and subtitle.
-/// E.g. "AgriPulse" (orange) + " Admin" (white) and "Secure gateway...".
+/// E.g. "AgriPulse" (orange) + " Suite" (white) and a subtitle line.
 class AppHeader extends StatelessWidget {
   const AppHeader({
     super.key,

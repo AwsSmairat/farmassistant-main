@@ -20,6 +20,8 @@ class SensorsCubit extends Cubit<SensorsState> {
         emit(SensorsReady(
           snapshot: snapshot,
           tiles: SensorsUiMapper.tilesFrom(snapshot),
+          isCheckingSoilMoisture: false,
+          isMonitoringEnabled: true,
         ));
       },
       onError: (Object e, StackTrace st) {
@@ -28,6 +30,51 @@ class SensorsCubit extends Cubit<SensorsState> {
         ));
       },
     );
+  }
+
+  void toggleMonitoring() {
+    final current = state;
+    if (current is! SensorsReady) return;
+
+    if (current.isMonitoringEnabled) {
+      _sub?.cancel();
+      _sub = null;
+      emit(SensorsReady(
+        snapshot: current.snapshot,
+        tiles: current.tiles,
+        isCheckingSoilMoisture: false,
+        isMonitoringEnabled: false,
+      ));
+      return;
+    }
+
+    start();
+  }
+
+  Future<void> checkSoilMoisture() async {
+    final current = state;
+    if (current is! SensorsReady) return;
+
+    emit(SensorsReady(
+      snapshot: current.snapshot,
+      tiles: current.tiles,
+      isCheckingSoilMoisture: true,
+      isMonitoringEnabled: current.isMonitoringEnabled,
+    ));
+
+    try {
+      final snapshot = await _watchSensorsDashboard().first;
+      emit(SensorsReady(
+        snapshot: snapshot,
+        tiles: SensorsUiMapper.tilesFrom(snapshot),
+        isCheckingSoilMoisture: false,
+        isMonitoringEnabled: current.isMonitoringEnabled,
+      ));
+    } catch (e, _) {
+      emit(SensorsFailure(
+        e is Exception ? e.toString().replaceFirst('Exception: ', '') : e.toString(),
+      ));
+    }
   }
 
   @override

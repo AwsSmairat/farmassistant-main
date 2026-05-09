@@ -22,13 +22,17 @@ final class SensorsReady extends SensorsState {
   const SensorsReady({
     required this.snapshot,
     required this.tiles,
+    this.isCheckingSoilMoisture = false,
+    this.isMonitoringEnabled = true,
   });
 
   final SensorsSnapshot snapshot;
   final List<SensorTileVm> tiles;
+  final bool isCheckingSoilMoisture;
+  final bool isMonitoringEnabled;
 
   @override
-  List<Object?> get props => [snapshot, tiles];
+  List<Object?> get props => [snapshot, tiles, isCheckingSoilMoisture, isMonitoringEnabled];
 }
 
 final class SensorsFailure extends SensorsState {

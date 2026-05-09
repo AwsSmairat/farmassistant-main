@@ -82,6 +82,16 @@ class _SensorsView extends StatelessWidget {
                 ),
                 SliverToBoxAdapter(
                   child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    child: _SoilMoistureCheckButton(
+                      loading: false,
+                      enabled: state.isMonitoringEnabled,
+                      onPressed: () => context.read<SensorsCubit>().toggleMonitoring(),
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
                     child: _RobotLocationMap(
                       latitude: snap.latitude,
@@ -101,6 +111,61 @@ class _SensorsView extends StatelessWidget {
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _SoilMoistureCheckButton extends StatelessWidget {
+  const _SoilMoistureCheckButton({
+    required this.loading,
+    required this.enabled,
+    required this.onPressed,
+  });
+
+  final bool loading;
+  final bool enabled;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: TextButton.icon(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.textPrimary,
+          backgroundColor: AppColors.surface.withValues(alpha: 0.36),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: AppColors.primary.withValues(alpha: 0.28),
+              width: 1,
+            ),
+          ),
+        ),
+        icon: loading
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primary,
+                ),
+              )
+            : Icon(
+                enabled ? Icons.power_settings_new : Icons.play_arrow_rounded,
+                size: 18,
+                color: AppColors.primary,
+              ),
+        label: Text(
+          loading ? '...' : 'فحص رطوبة التربة',
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 11,
+          ),
         ),
       ),
     );

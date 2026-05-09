@@ -106,24 +106,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             const SizedBox(height: 12),
-            LiquidGlassPanel(
-              borderRadius: LiquidGlassTokens.radiusSm,
-              blurSigma: LiquidGlassTokens.blurSoft,
-              child: OutlinedButton.icon(
-                onPressed: () => context.push('/privacy-policy'),
-                icon: const Icon(Icons.privacy_tip_outlined),
-                label: const Text('سياسة الخصوصية'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.textPrimary,
-                  side: BorderSide(color: AppColors.border.withValues(alpha: 0.65)),
-                  backgroundColor: Colors.transparent,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(LiquidGlassTokens.radiusSm),
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),

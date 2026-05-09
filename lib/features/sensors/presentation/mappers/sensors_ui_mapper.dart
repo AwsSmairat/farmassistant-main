@@ -28,11 +28,7 @@ class SensorsUiMapper {
   static List<SensorTileVm> tilesFrom(SensorsSnapshot s) {
     return [
       _soilMoisture(s),
-      _temperature(s),
-      _humidity(s),
       _waterLevel(s),
-      _ph(s),
-      _battery(s),
     ];
   }
 
@@ -58,29 +54,6 @@ class SensorsUiMapper {
     );
   }
 
-  static SensorTileVm _temperature(SensorsSnapshot s) {
-    final t = s.temperatureCelsius;
-    SensorHealth h = SensorHealth.good;
-    if (t > 34 || t < 5) h = SensorHealth.warning;
-    return SensorTileVm(
-      title: 'درجة الحرارة',
-      value: '${t.toStringAsFixed(1)}°C',
-      icon: Icons.thermostat_outlined,
-      health: h,
-    );
-  }
-
-  static SensorTileVm _humidity(SensorsSnapshot s) {
-    final v = s.humidityPercent;
-    SensorHealth h = SensorHealth.good;
-    if (v < 35 || v > 75) h = SensorHealth.warning;
-    return SensorTileVm(
-      title: 'رطوبة الهواء',
-      value: '${v.toStringAsFixed(1)}%',
-      icon: Icons.cloud_outlined,
-      health: h,
-    );
-  }
 
   static SensorTileVm _waterLevel(SensorsSnapshot s) {
     final v = s.waterLevelPercent;
@@ -104,47 +77,4 @@ class SensorsUiMapper {
     );
   }
 
-  static SensorTileVm _ph(SensorsSnapshot s) {
-    final p = s.ph;
-    SensorHealth h;
-    String? hint;
-    if (p >= 6.0 && p <= 7.5) {
-      h = SensorHealth.good;
-    } else if (p >= 5.5 && p < 6.0 || p > 7.5 && p <= 8.0) {
-      h = SensorHealth.warning;
-      hint = 'قرب الحدود';
-    } else {
-      h = SensorHealth.critical;
-      hint = 'قيمة pH خارج المدى الطبيعي';
-    }
-    return SensorTileVm(
-      title: 'pH التربة',
-      value: p.toStringAsFixed(1),
-      icon: Icons.science_outlined,
-      health: h,
-      hint: hint,
-    );
-  }
-
-  static SensorTileVm _battery(SensorsSnapshot s) {
-    final b = s.batteryPercent;
-    SensorHealth h;
-    String? hint;
-    if (b >= 40) {
-      h = SensorHealth.good;
-    } else if (b >= 20) {
-      h = SensorHealth.warning;
-      hint = 'شحن منخفض';
-    } else {
-      h = SensorHealth.critical;
-      hint = 'البطارية منخفضة جداً';
-    }
-    return SensorTileVm(
-      title: 'بطارية الروبوت',
-      value: '${b.toStringAsFixed(0)}%',
-      icon: Icons.battery_charging_full_outlined,
-      health: h,
-      hint: hint,
-    );
-  }
 }

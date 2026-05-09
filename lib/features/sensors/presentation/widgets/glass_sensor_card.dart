@@ -7,9 +7,14 @@ import '../mappers/sensors_ui_mapper.dart';
 
 /// Sensor tile with shared liquid-glass panel; status tint only on the border.
 class GlassSensorCard extends StatelessWidget {
-  const GlassSensorCard({super.key, required this.tile});
+  const GlassSensorCard({
+    super.key,
+    required this.tile,
+    this.footer,
+  });
 
   final SensorTileVm tile;
+  final Widget? footer;
 
   static Color _accent(SensorHealth h) {
     switch (h) {
@@ -91,6 +96,10 @@ class GlassSensorCard extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
+            ],
+            if (footer != null) ...[
+              const SizedBox(height: 10),
+              footer!,
             ],
           ],
         ),
