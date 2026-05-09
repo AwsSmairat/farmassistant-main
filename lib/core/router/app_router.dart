@@ -10,6 +10,7 @@ import '../../features/auth/presentation/cubit/signup_cubit.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/signup_page.dart';
+import '../../features/diagnosis/presentation/cubit/diagnosis_history_cubit.dart';
 import '../../features/diagnosis/presentation/pages/diagnosis_history_page.dart';
 import '../../features/home/presentation/pages/home_shell_page.dart';
 import '../../features/profile/presentation/pages/privacy_policy_page.dart';
@@ -73,7 +74,10 @@ class AppRouter {
         ),
         GoRoute(
           path: '/diagnosis',
-          builder: (context, state) => const DiagnosisHistoryPage(),
+          builder: (context, state) => BlocProvider(
+            create: (_) => getIt<DiagnosisHistoryCubit>()..start(),
+            child: const DiagnosisHistoryPage(),
+          ),
         ),
         GoRoute(
           path: '/robot-control',

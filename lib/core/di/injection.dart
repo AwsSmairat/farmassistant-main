@@ -16,11 +16,13 @@ import '../../features/auth/domain/usecases/stream_auth_state.dart';
 import '../../features/auth/presentation/cubit/forgot_password_cubit.dart';
 import '../../features/auth/presentation/cubit/login_cubit.dart';
 import '../../features/auth/presentation/cubit/signup_cubit.dart';
-import '../../features/home/data/datasources/robot_sensor_remote_datasource.dart';
-import '../../features/home/data/datasources/robot_sensor_remote_datasource_impl.dart';
+import '../../features/diagnosis/data/repositories/diagnosis_repository_impl.dart';
+import '../../features/diagnosis/domain/repositories/diagnosis_repository.dart';
+import '../../features/diagnosis/domain/usecases/watch_diagnosis_history.dart';
+import '../../features/diagnosis/presentation/cubit/diagnosis_history_cubit.dart';
 import '../../features/home/data/repositories/dashboard_repository_impl.dart';
 import '../../features/home/domain/repositories/dashboard_repository.dart';
-import '../../features/home/domain/usecases/get_dashboard_data.dart';
+import '../../features/home/domain/usecases/watch_dashboard_data.dart';
 import '../../features/home/presentation/cubit/dashboard_cubit.dart';
 import '../../features/notifications/data/datasources/notifications_remote_datasource.dart';
 import '../../features/notifications/data/datasources/notifications_remote_datasource_impl.dart';
@@ -40,12 +42,14 @@ import '../../features/profile/data/repositories/privacy_policy_repository_impl.
 import '../../features/profile/domain/repositories/privacy_policy_repository.dart';
 import '../../features/profile/presentation/cubit/privacy_policy_cubit.dart';
 import '../../features/profile/presentation/cubit/profile_cubit.dart';
+import '../../features/robot/domain/usecases/dispatch_robot_firestore_commands.dart';
 import '../../features/sensors/data/datasources/sensors_remote_datasource.dart';
 import '../../features/sensors/data/datasources/sensors_remote_datasource_impl.dart';
 import '../../features/sensors/data/repositories/sensors_repository_impl.dart';
 import '../../features/sensors/domain/repositories/sensors_repository.dart';
 import '../../features/sensors/domain/usecases/watch_sensors_dashboard.dart';
 import '../../features/sensors/presentation/cubit/sensors_cubit.dart';
+import '../../features/telemetry/data/datasources/farm_firestore_telemetry_datasource.dart';
 
 final getIt = GetIt.instance;
 
@@ -54,6 +58,9 @@ Future<void> setupInjection() async {
   getIt.registerLazySingleton<AuthRemoteDatasource>(() => AuthRemoteDatasource());
   getIt.registerLazySingleton<UserProfileRemoteDatasource>(
     () => UserProfileRemoteDatasource(),
+  );
+  getIt.registerLazySingleton<FarmFirestoreTelemetryDatasource>(
+    () => FarmFirestoreTelemetryDatasource(),
   );
 
   // Repositories
@@ -100,20 +107,21 @@ Future<void> setupInjection() async {
     () => ForgotPasswordCubit(getIt<SendPasswordReset>()),
   );
 
-  // Home / Dashboard
-  getIt.registerLazySingleton<RobotSensorRemoteDatasource>(
-    () => RobotSensorRemoteDatasourceImpl(),
-  );
+  getIt.registerLazySingleton(() => DispatchRobotFirestoreCommands(
+        getIt<FarmFirestoreTelemetryDatasource>(),
+      ));
+
+  // Home / Dashboard (Firestore realtime)
   getIt.registerLazySingleton<DashboardRepository>(
     () => DashboardRepositoryImpl(
       getIt<AuthRepository>(),
       getIt<UserProfileRepository>(),
-      getIt<RobotSensorRemoteDatasource>(),
+      getIt<FarmFirestoreTelemetryDatasource>(),
     ),
   );
-  getIt.registerLazySingleton(() => GetDashboardData(getIt<DashboardRepository>()));
+  getIt.registerLazySingleton(() => WatchDashboardData(getIt<DashboardRepository>()));
   getIt.registerFactory<DashboardCubit>(
-    () => DashboardCubit(getIt<GetDashboardData>()),
+    () => DashboardCubit(getIt<WatchDashboardData>()),
   );
 
   // Notifications
@@ -177,9 +185,9 @@ Future<void> setupInjection() async {
     ),
   );
 
-  // Sensors dashboard
+  // Sensors dashboard (Firestore realtime)
   getIt.registerLazySingleton<SensorsRemoteDatasource>(
-    () => SensorsRemoteDatasourceImpl(),
+    () => SensorsRemoteDatasourceImpl(getIt<FarmFirestoreTelemetryDatasource>()),
   );
   getIt.registerLazySingleton<SensorsRepository>(
     () => SensorsRepositoryImpl(getIt<SensorsRemoteDatasource>()),
@@ -189,5 +197,16 @@ Future<void> setupInjection() async {
   );
   getIt.registerFactory<SensorsCubit>(
     () => SensorsCubit(getIt<WatchSensorsDashboard>()),
+  );
+
+  // Diagnosis history (Firestore realtime)
+  getIt.registerLazySingleton<DiagnosisRepository>(
+    () => DiagnosisRepositoryImpl(getIt<FarmFirestoreTelemetryDatasource>()),
+  );
+  getIt.registerLazySingleton(
+    () => WatchDiagnosisHistory(getIt<DiagnosisRepository>()),
+  );
+  getIt.registerFactory<DiagnosisHistoryCubit>(
+    () => DiagnosisHistoryCubit(getIt<WatchDiagnosisHistory>()),
   );
 }

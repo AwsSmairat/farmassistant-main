@@ -1,22 +1,33 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/usecases/get_dashboard_data.dart';
+import '../../domain/entities/dashboard_data.dart';
+import '../../domain/usecases/watch_dashboard_data.dart';
 import 'dashboard_state.dart';
 
 class DashboardCubit extends Cubit<DashboardState> {
-  DashboardCubit(this._getDashboardData) : super(const DashboardInitial());
+  DashboardCubit(this._watchDashboardData) : super(const DashboardInitial());
 
-  final GetDashboardData _getDashboardData;
+  final WatchDashboardData _watchDashboardData;
+  StreamSubscription<DashboardData>? _sub;
 
-  Future<void> load() async {
+  void load() {
     emit(const DashboardLoading());
-    try {
-      final data = await _getDashboardData();
-      emit(DashboardLoaded(data));
-    } catch (e, _) {
-      emit(DashboardFailure(
-        e is Exception ? e.toString().replaceFirst('Exception: ', '') : e.toString(),
-      ));
-    }
+    _sub?.cancel();
+    _sub = _watchDashboardData().listen(
+      (data) => emit(DashboardLoaded(data)),
+      onError: (Object e, _) {
+        emit(DashboardFailure(
+          e is Exception ? e.toString().replaceFirst('Exception: ', '') : e.toString(),
+        ));
+      },
+    );
+  }
+
+  @override
+  Future<void> close() {
+    _sub?.cancel();
+    return super.close();
   }
 }

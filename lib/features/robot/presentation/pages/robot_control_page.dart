@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../domain/usecases/dispatch_robot_firestore_commands.dart';
 import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../../../auth/presentation/widgets/logout_icon_button.dart';
 
@@ -47,14 +49,14 @@ class _RobotControlPageState extends State<RobotControlPage> {
               const SizedBox(height: 16),
               _PrimaryControlRow(
                 autoModeOn: _autoModeOn,
-                onAutoModeTap: () => setState(() => _autoModeOn = !_autoModeOn),
-                onStop: _showSnack,
+                onAutoModeTap: _onAutoModeTap,
+                onStop: _onStopPressed,
               ),
               const SizedBox(height: 12),
               _WaterPumpRow(
                 isOn: _waterPumpOn,
-                onChanged: (v) => setState(() => _waterPumpOn = v),
-                onTap: () => setState(() => _waterPumpOn = !_waterPumpOn),
+                onChanged: _onPumpChanged,
+                onTap: _onPumpToggle,
               ),
               const SizedBox(height: 16),
               const _DirectionPad(),
@@ -76,6 +78,41 @@ class _RobotControlPageState extends State<RobotControlPage> {
         duration: const Duration(milliseconds: 500),
       ),
     );
+  }
+
+  Future<void> _onStopPressed() async {
+    try {
+      await getIt<DispatchRobotFirestoreCommands>().sendMove('stop');
+      _showSnack('Stop');
+    } catch (e) {
+      _showSnack('تعذر إرسال أمر الإيقاف');
+    }
+  }
+
+  Future<void> _onAutoModeTap() async {
+    final next = !_autoModeOn;
+    setState(() => _autoModeOn = next);
+    if (!next) return;
+    try {
+      await getIt<DispatchRobotFirestoreCommands>().requestScan();
+      _showSnack('طلب فحص');
+    } catch (_) {
+      _showSnack('تعذر إرسال طلب الفحص');
+    }
+  }
+
+  Future<void> _onPumpChanged(bool v) async {
+    setState(() => _waterPumpOn = v);
+    try {
+      await getIt<DispatchRobotFirestoreCommands>().sendPump(v);
+    } catch (_) {
+      if (mounted) _showSnack('تعذر تحديث حالة المضخة');
+    }
+  }
+
+  Future<void> _onPumpToggle() async {
+    final next = !_waterPumpOn;
+    await _onPumpChanged(next);
   }
 }
 
@@ -184,7 +221,7 @@ class _PrimaryControlRow extends StatelessWidget {
 
   final bool autoModeOn;
   final VoidCallback onAutoModeTap;
-  final void Function(String) onStop;
+  final VoidCallback onStop;
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +243,7 @@ class _PrimaryControlRow extends StatelessWidget {
               label: 'Stop',
               icon: Icons.stop,
               color: AppColors.error,
-              onPressed: () => onStop('Stop'),
+              onPressed: onStop,
             ),
           ),
         ],
@@ -433,7 +470,7 @@ class _DirectionPad extends StatelessWidget {
                     child: _ArrowButton(
                       icon: Icons.keyboard_arrow_up_rounded,
                       semanticLabel: 'أمام',
-                      onPressed: () => _onDirection(context, 'أمام'),
+                      onPressed: () => _fireMove(context, 'forward'),
                     ),
                   ),
                   Positioned(
@@ -441,7 +478,7 @@ class _DirectionPad extends StatelessWidget {
                     child: _ArrowButton(
                       icon: Icons.keyboard_arrow_down_rounded,
                       semanticLabel: 'خلف',
-                      onPressed: () => _onDirection(context, 'خلف'),
+                      onPressed: () => _fireMove(context, 'backward'),
                     ),
                   ),
                   Positioned(
@@ -449,7 +486,7 @@ class _DirectionPad extends StatelessWidget {
                     child: _ArrowButton(
                       icon: Icons.keyboard_arrow_left_rounded,
                       semanticLabel: 'يسار',
-                      onPressed: () => _onDirection(context, 'يسار'),
+                      onPressed: () => _fireMove(context, 'left'),
                     ),
                   ),
                   Positioned(
@@ -457,7 +494,7 @@ class _DirectionPad extends StatelessWidget {
                     child: _ArrowButton(
                       icon: Icons.keyboard_arrow_right_rounded,
                       semanticLabel: 'يمين',
-                      onPressed: () => _onDirection(context, 'يمين'),
+                      onPressed: () => _fireMove(context, 'right'),
                     ),
                   ),
                 ],
@@ -469,16 +506,29 @@ class _DirectionPad extends StatelessWidget {
     );
   }
 
-  void _onDirection(BuildContext context, String direction) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(direction),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.surface,
-        duration: const Duration(milliseconds: 400),
-      ),
-    );
+  Future<void> _fireMove(BuildContext context, String direction) async {
+    try {
+      await getIt<DispatchRobotFirestoreCommands>().sendMove(direction);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(direction),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.surface,
+          duration: const Duration(milliseconds: 400),
+        ),
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('تعذر إرسال أمر الحركة'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.surface,
+        ),
+      );
+    }
   }
 }
 
