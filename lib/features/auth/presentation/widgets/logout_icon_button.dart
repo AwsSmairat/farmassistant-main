@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
@@ -8,8 +7,8 @@ import '../../domain/usecases/sign_out.dart';
 
 /// Toolbar action: signs out via [SignOut] then navigates to login.
 ///
-/// Uses [GoRouter.refresh], [SchedulerBinding.scheduleFrame], and a post-frame
-/// [go] so Flutter Web repaints immediately (avoids “works after another tap”).
+/// Relies on [AuthRemoteDatasource.signOut] waiting until Firebase reports a null
+/// user so [GoRouter] redirect does not bounce `/login` → `/` from a stale session.
 class LogoutIconButton extends StatefulWidget {
   const LogoutIconButton({super.key});
 
@@ -29,12 +28,7 @@ class _LogoutIconButtonState extends State<LogoutIconButton> {
 
       final router = GoRouter.of(context);
       router.refresh();
-      SchedulerBinding.instance.scheduleFrame();
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        router.go('/login');
-      });
+      router.go('/login');
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

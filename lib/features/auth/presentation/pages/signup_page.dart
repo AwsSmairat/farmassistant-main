@@ -68,7 +68,10 @@ class _SignupViewState extends State<_SignupView> {
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              context.go('/');
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!context.mounted) return;
+                GoRouter.of(context).refresh();
+              });
             },
             child: const Text('حسناً'),
           ),
@@ -95,40 +98,51 @@ class _SignupViewState extends State<_SignupView> {
           child: BlocConsumer<SignupCubit, SignupState>(
           listener: (context, state) {
             if (state.status == SignupStatus.failure) {
-              ScaffoldMessenger.of(context).showSnackBar(
+              ScaffoldMessenger.maybeOf(context)?.showSnackBar(
                 SnackBar(
                   content: Text(state.message ?? 'حدث خطأ'),
                   backgroundColor: AppColors.error,
                 ),
               );
             }
-            if (state.status == SignupStatus.success && state.user != null) {
+
+            final signedUpUser = state.user;
+            if (state.status == SignupStatus.success && signedUpUser != null) {
               if (state.showEmailVerificationDialog) {
-                final email = state.user!.email ?? _emailController.text.trim();
+                final email =
+                    signedUpUser.email ?? _emailController.text.trim();
                 _showVerificationDialog(context, email);
               } else {
-                context.go('/');
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!context.mounted) return;
+                  GoRouter.of(context).refresh();
+                });
               }
             }
+
             final gUser = state.user;
             if (state.status == SignupStatus.googleNeedsProfile &&
                 gUser != null) {
-              showGoogleProfileCompletionDialog(
-                context,
-                onSubmit: ({
-                  required String username,
-                  required String phone,
-                  required String password,
-                }) {
-                  context.read<SignupCubit>().completeGoogleProfile(
-                        user: gUser,
-                        username: username,
-                        phone: phone,
-                        password: password,
-                      );
-                },
-                onCancel: () => context.read<SignupCubit>().cancelGoogleProfile(),
-              );
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!context.mounted) return;
+                showGoogleProfileCompletionDialog(
+                  context,
+                  onSubmit: ({
+                    required String username,
+                    required String phone,
+                    required String password,
+                  }) {
+                    context.read<SignupCubit>().completeGoogleProfile(
+                          user: gUser,
+                          username: username,
+                          phone: phone,
+                          password: password,
+                        );
+                  },
+                  onCancel: () =>
+                      context.read<SignupCubit>().cancelGoogleProfile(),
+                );
+              });
             }
           },
           builder: (context, state) {

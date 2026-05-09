@@ -124,6 +124,10 @@ class AuthRemoteDatasource {
         throw const GoogleRedirectPendingException();
       }
       throw Exception(_authErrorMessage(e));
+    } catch (e) {
+      if (e is GoogleRedirectPendingException) rethrow;
+      if (e is Exception) rethrow;
+      throw Exception('فشل تسجيل الدخول بـ Google: $e');
     }
   }
 
@@ -152,27 +156,44 @@ class AuthRemoteDatasource {
       return AuthUserModel.fromFirebaseUser(user);
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw Exception(_authErrorMessage(e));
+    } catch (e) {
+      if (e is Exception) rethrow;
+      throw Exception('فشل تسجيل الدخول بـ Google: $e');
     }
   }
 
   Future<void> signOut() async {
-    await _firebaseAuth.signOut();
-    final g = _googleSignIn;
-    if (g != null) {
-      await g.signOut();
+    final googleSignIn = _googleSignIn;
+    final hadSession = _firebaseAuth.currentUser != null;
+
+    StreamSubscription<firebase_auth.User?>? authListener;
+    Future<void>? waitUntilNull;
+    if (hadSession) {
+      final signedOut = Completer<void>();
+      authListener = _firebaseAuth.authStateChanges().listen((user) {
+        if (user == null && !signedOut.isCompleted) {
+          signedOut.complete();
+        }
+      });
+      waitUntilNull = signedOut.future.timeout(const Duration(seconds: 15));
     }
-    // Web (and occasionally IO): signOut's Future can settle before
-    // currentUser / auth channel updates; UI then needs another gesture to refresh.
-    if (_firebaseAuth.currentUser != null) {
-      try {
-        await _firebaseAuth
-            .authStateChanges()
-            .firstWhere((firebase_auth.User? user) => user == null)
-            .timeout(const Duration(seconds: 8));
-      } on TimeoutException {
-        // Proceed — caller still navigates; rules rely on refreshListenable.
+
+    try {
+      await _firebaseAuth.signOut();
+      if (googleSignIn != null) {
+        await googleSignIn.signOut();
       }
+      if (waitUntilNull != null) {
+        try {
+          await waitUntilNull;
+        } on TimeoutException {
+          // Channel stalled; avoid hanging logout indefinitely.
+        }
+      }
+    } finally {
+      await authListener?.cancel();
     }
+
     if (kIsWeb) {
       await Future<void>.delayed(Duration.zero);
     }

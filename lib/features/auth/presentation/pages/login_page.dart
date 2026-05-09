@@ -55,35 +55,45 @@ class _LoginViewState extends State<_LoginView> {
           child: BlocConsumer<LoginCubit, LoginState>(
           listener: (context, state) {
             if (state.status == LoginStatus.failure) {
-              ScaffoldMessenger.of(context).showSnackBar(
+              ScaffoldMessenger.maybeOf(context)?.showSnackBar(
                 SnackBar(
                   content: Text(state.message ?? 'حدث خطأ'),
                   backgroundColor: AppColors.error,
                 ),
               );
             }
+
             final googleUser = state.user;
             if (state.status == LoginStatus.googleSignInNeedsProfile &&
                 googleUser != null) {
-              showGoogleProfileCompletionDialog(
-                context,
-                onSubmit: ({
-                  required String username,
-                  required String phone,
-                  required String password,
-                }) {
-                  context.read<LoginCubit>().completeGoogleProfile(
-                        user: googleUser,
-                        username: username,
-                        phone: phone,
-                        password: password,
-                      );
-                },
-                onCancel: () => context.read<LoginCubit>().cancelGoogleProfile(),
-              );
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!context.mounted) return;
+                showGoogleProfileCompletionDialog(
+                  context,
+                  onSubmit: ({
+                    required String username,
+                    required String phone,
+                    required String password,
+                  }) {
+                    context.read<LoginCubit>().completeGoogleProfile(
+                          user: googleUser,
+                          username: username,
+                          phone: phone,
+                          password: password,
+                        );
+                  },
+                  onCancel: () =>
+                      context.read<LoginCubit>().cancelGoogleProfile(),
+                );
+              });
             }
+
+            // Avoid context.go('/') racing FirebaseAuth + GoRouter redirect (can crash / stall on web).
             if (state.status == LoginStatus.success) {
-              context.go('/');
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!context.mounted) return;
+                GoRouter.of(context).refresh();
+              });
             }
           },
           builder: (context, state) {

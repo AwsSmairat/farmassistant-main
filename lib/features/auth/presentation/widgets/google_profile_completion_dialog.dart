@@ -18,7 +18,7 @@ Future<void> showGoogleProfileCompletionDialog(
   return showDialog<void>(
     context: context,
     barrierDismissible: false,
-    builder: (ctx) => AlertDialog(
+    builder: (dialogContext) => AlertDialog(
       backgroundColor: AppColors.surface,
       title: const Text('أكمل بياناتك'),
       content: SingleChildScrollView(
@@ -59,32 +59,31 @@ Future<void> showGoogleProfileCompletionDialog(
       actions: [
         TextButton(
           onPressed: () {
-            Navigator.of(ctx).pop();
+            Navigator.of(dialogContext).pop();
             onCancel();
           },
           child: const Text('إلغاء'),
         ),
         FilledButton(
           onPressed: () {
+            final messenger = ScaffoldMessenger.maybeOf(dialogContext);
+            void snack(String msg) {
+              messenger?.showSnackBar(SnackBar(content: Text(msg)));
+            }
+
             if (usernameController.text.trim().isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('أدخل اسم المستخدم')),
-              );
+              snack('أدخل اسم المستخدم');
               return;
             }
             if (phoneController.text.trim().isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('أدخل رقم الهاتف')),
-              );
+              snack('أدخل رقم الهاتف');
               return;
             }
             if (passwordController.text.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('أدخل كلمة المرور')),
-              );
+              snack('أدخل كلمة المرور');
               return;
             }
-            Navigator.of(ctx).pop();
+            Navigator.of(dialogContext).pop();
             onSubmit(
               username: usernameController.text.trim(),
               phone: phoneController.text.trim(),

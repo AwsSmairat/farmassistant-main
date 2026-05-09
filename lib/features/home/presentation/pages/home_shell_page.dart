@@ -107,18 +107,22 @@ class _HomeShellPageState extends State<HomeShellPage> {
           );
         }
 
+        final expandedRail = constraints.maxWidth >= AppBreakpoints.expanded;
+
         return Scaffold(
           backgroundColor: Colors.transparent,
           body: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               NavigationRail(
-                extended: constraints.maxWidth >= AppBreakpoints.expanded,
+                extended: expandedRail,
                 backgroundColor: AppColors.navBackground.withValues(alpha: 0.92),
                 selectedIndex: _currentIndex,
                 onDestinationSelected: (i) => setState(() => _currentIndex = i),
-                labelType: constraints.maxWidth >= AppBreakpoints.expanded
-                    ? NavigationRailLabelType.all
+                // Material constraint: [extended] requires [labelType] == none
+                // (labels sit beside icons when extended).
+                labelType: expandedRail
+                    ? NavigationRailLabelType.none
                     : NavigationRailLabelType.selected,
                 indicatorColor: AppColors.primary.withValues(alpha: 0.22),
                 selectedIconTheme: const IconThemeData(color: AppColors.primary),

@@ -11,8 +11,16 @@ class AuthUserModel extends AuthUser {
   });
 
   factory AuthUserModel.fromFirebaseUser(dynamic user) {
+    if (user == null) {
+      throw Exception('فشل تسجيل الدخول: لا توجد بيانات مستخدم من Firebase.');
+    }
+    final dynamic rawUid = user.uid;
+    final String uid = rawUid is String ? rawUid : '$rawUid';
+    if (uid.isEmpty) {
+      throw Exception('فشل تسجيل الدخول: معرّف المستخدم غير متاح.');
+    }
     return AuthUserModel(
-      id: user.uid as String,
+      id: uid,
       email: user.email as String?,
       displayName: user.displayName as String?,
       photoUrl: user.photoURL as String?,
