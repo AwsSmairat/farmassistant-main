@@ -1,1 +1,41 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"farmassistant-54d84","appId":"1:698540357194:android:e3380e1e65a0cf6aa498b3","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"farmassistant-54d84","configurations":{"android":"1:698540357194:android:e3380e1e65a0cf6aa498b3","ios":"1:698540357194:ios:3286a7ab26e8b484a498b3","web":"1:698540357194:web:b07fdb2195fd936ea498b3"}}},"ios":{"default":{"projectId":"farmassistant-54d84","appId":"1:698540357194:ios:3286a7ab26e8b484a498b3","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "farmassistant-54d84",
+          "appId": "1:698540357194:android:e3380e1e65a0cf6aa498b3",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "farmassistant-54d84",
+          "configurations": {
+            "android": "1:698540357194:android:e3380e1e65a0cf6aa498b3",
+            "ios": "1:698540357194:ios:3286a7ab26e8b484a498b3",
+            "web": "1:698540357194:web:b07fdb2195fd936ea498b3"
+          }
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "farmassistant-54d84",
+          "appId": "1:698540357194:ios:3286a7ab26e8b484a498b3",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

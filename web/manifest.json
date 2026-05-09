@@ -1,12 +1,12 @@
 {
-    "name": "farm_assistant",
-    "short_name": "farm_assistant",
+    "name": "Farm Assistant",
+    "short_name": "FarmAssist",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#261A14",
+    "theme_color": "#F37A20",
+    "description": "Farm Assistant — إدارة المزرعة الذكية",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

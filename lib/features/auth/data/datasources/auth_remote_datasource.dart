@@ -1,8 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../models/auth_user_model.dart';
 import '../../domain/entities/auth_user.dart';
+
+GoogleSignIn _createGoogleSignIn() {
+  if (kIsWeb) {
+    const clientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
+    if (clientId.isNotEmpty) {
+      return GoogleSignIn(clientId: clientId);
+    }
+  }
+  return GoogleSignIn();
+}
 
 /// Remote auth operations. All Firebase/Google logic stays here.
 class AuthRemoteDatasource {
@@ -10,7 +21,7 @@ class AuthRemoteDatasource {
     firebase_auth.FirebaseAuth? firebaseAuth,
     GoogleSignIn? googleSignIn,
   })  : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn();
+        _googleSignIn = googleSignIn ?? _createGoogleSignIn();
 
   final firebase_auth.FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;

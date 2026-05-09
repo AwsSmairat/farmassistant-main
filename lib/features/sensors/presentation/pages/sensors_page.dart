@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/layout/responsive_layout.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../cubit/sensors_cubit.dart';
@@ -54,6 +55,9 @@ class _SensorsView extends StatelessWidget {
             final snap = state.snapshot;
             final formattedTime =
                 '${snap.updatedAt.hour.toString().padLeft(2, '0')}:${snap.updatedAt.minute.toString().padLeft(2, '0')}';
+            final crossAxisCount = AppBreakpoints.sensorsGridCrossAxisCount(
+              MediaQuery.sizeOf(context).width,
+            );
 
             return CustomScrollView(
               slivers: [
@@ -66,11 +70,11 @@ class _SensorsView extends StatelessWidget {
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
-                      childAspectRatio: 0.92,
+                      childAspectRatio: crossAxisCount >= 3 ? 1.05 : 0.92,
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {

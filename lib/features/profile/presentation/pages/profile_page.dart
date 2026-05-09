@@ -1,6 +1,7 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -90,7 +91,7 @@ class _ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<_ProfileView> {
-  File? _pickedImage;
+  Uint8List? _pickedImageBytes;
   bool _picking = false;
 
   @override
@@ -103,15 +104,15 @@ class _ProfileViewState extends State<_ProfileView> {
   void didUpdateWidget(covariant _ProfileView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.profile.uid != widget.profile.uid) {
-      _pickedImage = null;
+      _pickedImageBytes = null;
       _restoreLocalAvatar();
     }
   }
 
   Future<void> _restoreLocalAvatar() async {
-    final file = await ProfileLocalAvatarStore.loadIfExists(widget.profile.uid);
-    if (mounted && file != null) {
-      setState(() => _pickedImage = file);
+    final bytes = await ProfileLocalAvatarStore.loadIfExists(widget.profile.uid);
+    if (mounted && bytes != null) {
+      setState(() => _pickedImageBytes = bytes);
     }
   }
 
@@ -122,13 +123,14 @@ class _ProfileViewState extends State<_ProfileView> {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.image,
         allowMultiple: false,
+        withData: kIsWeb,
       );
       if (!mounted) return;
 
       final picked = result != null && result.files.isNotEmpty
           ? result.files.first
           : null;
-      File? stored;
+      Uint8List? stored;
       if (picked != null) {
         stored = await ProfileLocalAvatarStore.persistPick(
           widget.profile.uid,
@@ -140,7 +142,7 @@ class _ProfileViewState extends State<_ProfileView> {
       if (!mounted) return;
       setState(() {
         _picking = false;
-        if (stored != null) _pickedImage = stored;
+        if (stored != null) _pickedImageBytes = stored;
       });
     } catch (_) {
       if (mounted) {
@@ -165,7 +167,7 @@ class _ProfileViewState extends State<_ProfileView> {
           const SizedBox(height: 16),
           Center(
             child: _ProfileImagePlaceholder(
-              imageFile: _pickedImage,
+              imageBytes: _pickedImageBytes,
               isLoading: _picking,
               onTap: _pickImage,
             ),
@@ -207,12 +209,12 @@ class _ProfileViewState extends State<_ProfileView> {
 /// Profile photo: tappable to pick from gallery. Shows placeholder or selected image.
 class _ProfileImagePlaceholder extends StatelessWidget {
   const _ProfileImagePlaceholder({
-    this.imageFile,
+    this.imageBytes,
     this.isLoading = false,
     required this.onTap,
   });
 
-  final File? imageFile;
+  final Uint8List? imageBytes;
   final bool isLoading;
   final VoidCallback onTap;
 
@@ -242,12 +244,13 @@ class _ProfileImagePlaceholder extends StatelessWidget {
                   ),
                 ),
               )
-            : imageFile != null
-                ? Image.file(
-                    imageFile!,
+            : imageBytes != null
+                ? Image.memory(
+                    imageBytes!,
                     fit: BoxFit.cover,
                     width: _size,
                     height: _size,
+                    gaplessPlayback: true,
                   )
                 : Icon(
                     Icons.person,

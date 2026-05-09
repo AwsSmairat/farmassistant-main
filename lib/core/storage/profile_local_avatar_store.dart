@@ -1,45 +1,24 @@
-import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:path_provider/path_provider.dart';
+import 'profile_local_avatar_store_stub.dart'
+    if (dart.library.html) 'profile_local_avatar_store_web.dart'
+    if (dart.library.io) 'profile_local_avatar_store_io.dart' as avatar_store_impl;
 
-/// Saves the profile photo under app documents so it survives restarts.
-/// One file per [uid] so different accounts do not share the same image.
+/// Persists profile photo bytes per account. On mobile/desktop IO uses documents
+/// directory; on web uses an in-session memory cache (bytes from picker).
 abstract final class ProfileLocalAvatarStore {
   ProfileLocalAvatarStore._();
 
-  static String _fileNameForUid(String uid) {
-    final safe = uid.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
-    return 'profile_avatar_$safe';
-  }
+  static Future<Uint8List?> loadIfExists(String uid) => avatar_store_impl.loadAvatarBytes(uid);
 
-  static Future<File> _fileForUid(String uid) async {
-    final dir = await getApplicationDocumentsDirectory();
-    return File('${dir.path}/${_fileNameForUid(uid)}');
-  }
-
-  static Future<File?> loadIfExists(String uid) async {
-    final f = await _fileForUid(uid);
-    return await f.exists() ? f : null;
-  }
-
-  /// [path] from gallery/file picker; [bytes] used when [path] is missing.
-  static Future<File?> persistPick(
+  static Future<Uint8List?> persistPick(
     String uid, {
     String? path,
     List<int>? bytes,
-  }) async {
-    final dest = await _fileForUid(uid);
-    if (path != null && path.isNotEmpty) {
-      final src = File(path);
-      if (await src.exists()) {
-        await src.copy(dest.path);
-        return dest;
-      }
-    }
-    if (bytes != null && bytes.isNotEmpty) {
-      await dest.writeAsBytes(bytes, flush: true);
-      return dest;
-    }
-    return null;
-  }
+  }) =>
+      avatar_store_impl.persistAvatarPick(
+        uid,
+        path: path,
+        bytes: bytes == null ? null : Uint8List.fromList(bytes),
+      );
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/layout/responsive_layout.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/core_widgets.dart';
 import '../../domain/entities/auth_user.dart';
@@ -137,7 +138,9 @@ class _LoginViewState extends State<_LoginView> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: BlocConsumer<LoginCubit, LoginState>(
+        child: ResponsiveCenter(
+          maxWidth: 520,
+          child: BlocConsumer<LoginCubit, LoginState>(
           listener: (context, state) {
             if (state.status == LoginStatus.failure) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -275,6 +278,7 @@ class _LoginViewState extends State<_LoginView> {
               ),
             );
           },
+        ),
         ),
       ),
     );

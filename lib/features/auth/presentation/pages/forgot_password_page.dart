@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/layout/responsive_layout.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/core_widgets.dart';
 import '../cubit/forgot_password_cubit.dart';
@@ -50,7 +51,9 @@ class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
         title: const Text('استعادة كلمة المرور'),
       ),
       body: SafeArea(
-        child: BlocConsumer<ForgotPasswordCubit, ForgotPasswordState>(
+        child: ResponsiveCenter(
+          maxWidth: 480,
+          child: BlocConsumer<ForgotPasswordCubit, ForgotPasswordState>(
           listener: (context, state) {
             if (state.status == ForgotPasswordStatus.failure) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -117,6 +120,7 @@ class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
               ),
             );
           },
+        ),
         ),
       ),
     );
