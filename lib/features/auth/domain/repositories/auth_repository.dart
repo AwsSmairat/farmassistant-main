@@ -34,4 +34,7 @@ abstract class AuthRepository {
 
   /// Sign out.
   Future<void> signOut();
+
+  /// Web: completes Google sign-in after [signInWithRedirect] return (Safari / popup blocked).
+  Future<void> completeWebRedirectSignInIfNeeded();
 }

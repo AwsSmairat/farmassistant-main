@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../../../../core/error/app_exceptions.dart';
 import '../models/auth_user_model.dart';
 import '../../domain/entities/auth_user.dart';
 
@@ -89,17 +90,37 @@ class AuthRemoteDatasource {
     return _signInWithGoogleMobile();
   }
 
+  firebase_auth.GoogleAuthProvider _googleAuthProviderWeb() {
+    final provider = firebase_auth.GoogleAuthProvider();
+    provider.addScope('email');
+    provider.addScope('profile');
+    provider.setCustomParameters(const {'prompt': 'select_account'});
+    return provider;
+  }
+
+  /// Call once at startup on web after returning from [signInWithRedirect] (e.g. Safari).
+  Future<void> completeRedirectSignInIfNeeded() async {
+    if (!kIsWeb) return;
+    try {
+      await _firebaseAuth.getRedirectResult();
+    } catch (_) {}
+  }
+
   Future<AuthUser> _signInWithGoogleWeb() async {
     try {
-      final provider = firebase_auth.GoogleAuthProvider();
-      provider.addScope('email');
-      provider.addScope('profile');
-      provider.setCustomParameters(const {'prompt': 'select_account'});
+      final provider = _googleAuthProviderWeb();
       final cred = await _firebaseAuth.signInWithPopup(provider);
       final user = cred.user;
       if (user == null) throw Exception('فشل تسجيل الدخول بـ Google');
       return AuthUserModel.fromFirebaseUser(user);
     } on firebase_auth.FirebaseAuthException catch (e) {
+      final code = e.code.toLowerCase();
+      if (code.contains('popup') ||
+          code == 'popup-blocked' ||
+          code == 'cancelled-popup-request') {
+        await _firebaseAuth.signInWithRedirect(_googleAuthProviderWeb());
+        throw const GoogleRedirectPendingException();
+      }
       throw Exception(_authErrorMessage(e));
     }
   }

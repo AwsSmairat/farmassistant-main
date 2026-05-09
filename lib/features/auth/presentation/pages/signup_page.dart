@@ -6,6 +6,7 @@ import '../../../../core/layout/responsive_layout.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/core_widgets.dart';
 import '../cubit/signup_cubit.dart';
+import '../widgets/google_profile_completion_dialog.dart';
 
 class SignupPage extends StatelessWidget {
   const SignupPage({super.key});
@@ -102,8 +103,32 @@ class _SignupViewState extends State<_SignupView> {
               );
             }
             if (state.status == SignupStatus.success && state.user != null) {
-              final email = state.user!.email ?? _emailController.text.trim();
-              _showVerificationDialog(context, email);
+              if (state.showEmailVerificationDialog) {
+                final email = state.user!.email ?? _emailController.text.trim();
+                _showVerificationDialog(context, email);
+              } else {
+                context.go('/');
+              }
+            }
+            final gUser = state.user;
+            if (state.status == SignupStatus.googleNeedsProfile &&
+                gUser != null) {
+              showGoogleProfileCompletionDialog(
+                context,
+                onSubmit: ({
+                  required String username,
+                  required String phone,
+                  required String password,
+                }) {
+                  context.read<SignupCubit>().completeGoogleProfile(
+                        user: gUser,
+                        username: username,
+                        phone: phone,
+                        password: password,
+                      );
+                },
+                onCancel: () => context.read<SignupCubit>().cancelGoogleProfile(),
+              );
             }
           },
           builder: (context, state) {

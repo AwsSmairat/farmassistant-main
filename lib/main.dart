@@ -6,6 +6,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'core/di/injection.dart';
 import 'core/router/app_router.dart';
+import 'features/auth/domain/repositories/auth_repository.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/liquid_glass/liquid_glass.dart';
 import 'firebase_options.dart';
@@ -19,6 +20,9 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await setupInjection();
+  if (kIsWeb) {
+    await getIt<AuthRepository>().completeWebRedirectSignInIfNeeded();
+  }
   runApp(const FarmAssistantApp());
 }
 

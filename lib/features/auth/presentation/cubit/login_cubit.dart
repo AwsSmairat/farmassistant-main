@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/error/app_exceptions.dart';
 import '../../domain/entities/auth_user.dart';
 import '../../domain/repositories/user_profile_repository.dart';
 import '../../domain/usecases/sign_in_with_identifier.dart';
@@ -54,6 +55,8 @@ class LoginCubit extends Cubit<LoginState> {
       } else {
         emit(LoginState.googleSignInNeedsProfile(user));
       }
+    } on GoogleRedirectPendingException {
+      emit(const LoginState.loading());
     } catch (e, _) {
       emit(LoginState.failure(
         e is Exception ? e.toString().replaceFirst('Exception: ', '') : e.toString(),
@@ -68,6 +71,7 @@ class LoginCubit extends Cubit<LoginState> {
     required String phone,
     required String password,
   }) async {
+    assert(password.isNotEmpty);
     emit(const LoginState.loading());
     try {
       final email = user.email ?? '';

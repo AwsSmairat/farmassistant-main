@@ -92,6 +92,8 @@ Future<void> setupInjection() async {
     () => SignupCubit(
       createAccountWithEmail: getIt<CreateAccountWithEmail>(),
       signInWithGoogle: getIt<SignInWithGoogle>(),
+      userProfileRepository: getIt<UserProfileRepository>(),
+      signOut: getIt<SignOut>(),
     ),
   );
   getIt.registerFactory<ForgotPasswordCubit>(

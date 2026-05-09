@@ -46,4 +46,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> signOut() => _datasource.signOut();
+
+  @override
+  Future<void> completeWebRedirectSignInIfNeeded() =>
+      _datasource.completeRedirectSignInIfNeeded();
 }

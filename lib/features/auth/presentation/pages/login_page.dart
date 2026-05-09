@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/layout/responsive_layout.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/core_widgets.dart';
-import '../../domain/entities/auth_user.dart';
 import '../cubit/login_cubit.dart';
+import '../widgets/google_profile_completion_dialog.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -45,94 +45,6 @@ class _LoginViewState extends State<_LoginView> {
         );
   }
 
-  void _showGoogleProfileDialog(BuildContext context, AuthUser user) {
-    final usernameController = TextEditingController();
-    final phoneController = TextEditingController();
-    final passwordController = TextEditingController();
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('أكمل بياناتك'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: usernameController,
-                decoration: const InputDecoration(
-                  labelText: 'اسم المستخدم',
-                  hintText: 'username',
-                ),
-                textInputAction: TextInputAction.next,
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: phoneController,
-                decoration: const InputDecoration(
-                  labelText: 'رقم الهاتف',
-                  hintText: '+962 7XXXXXXXX',
-                ),
-                keyboardType: TextInputType.phone,
-                textInputAction: TextInputAction.next,
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'كلمة المرور',
-                  hintText: '••••••••',
-                ),
-                textInputAction: TextInputAction.done,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              context.read<LoginCubit>().cancelGoogleProfile();
-            },
-            child: const Text('إلغاء'),
-          ),
-          FilledButton(
-            onPressed: () {
-              if (usernameController.text.trim().isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('أدخل اسم المستخدم')),
-                );
-                return;
-              }
-              if (phoneController.text.trim().isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('أدخل رقم الهاتف')),
-                );
-                return;
-              }
-              if (passwordController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('أدخل كلمة المرور')),
-                );
-                return;
-              }
-              Navigator.of(ctx).pop();
-              context.read<LoginCubit>().completeGoogleProfile(
-                    user: user,
-                    username: usernameController.text.trim(),
-                    phone: phoneController.text.trim(),
-                    password: passwordController.text,
-                  );
-            },
-            child: const Text('التالي'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,7 +65,22 @@ class _LoginViewState extends State<_LoginView> {
             final googleUser = state.user;
             if (state.status == LoginStatus.googleSignInNeedsProfile &&
                 googleUser != null) {
-              _showGoogleProfileDialog(context, googleUser);
+              showGoogleProfileCompletionDialog(
+                context,
+                onSubmit: ({
+                  required String username,
+                  required String phone,
+                  required String password,
+                }) {
+                  context.read<LoginCubit>().completeGoogleProfile(
+                        user: googleUser,
+                        username: username,
+                        phone: phone,
+                        password: password,
+                      );
+                },
+                onCancel: () => context.read<LoginCubit>().cancelGoogleProfile(),
+              );
             }
             if (state.status == LoginStatus.success) {
               context.go('/');

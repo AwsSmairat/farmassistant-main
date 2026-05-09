@@ -26,6 +26,12 @@
 
   <title>Farm Assistant</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Safari / iOS WebView: full viewport + background before Flutter paints -->
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; background-color: #261A14; }
+    body { -webkit-text-size-adjust: 100%; }
+  </style>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
