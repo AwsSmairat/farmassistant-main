@@ -10,7 +10,7 @@ import '../../../../core/di/injection.dart';
 import '../../../../core/storage/profile_local_avatar_store.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
-import '../../../auth/domain/usecases/sign_out.dart';
+import '../../../auth/presentation/widgets/logout_icon_button.dart';
 import '../../domain/entities/profile.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
@@ -32,13 +32,7 @@ class ProfilePage extends StatelessWidget {
               icon: const Icon(Icons.settings_outlined),
               onPressed: () => context.push('/settings'),
             ),
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () async {
-                await getIt<SignOut>().call();
-                if (context.mounted) context.go('/login');
-              },
-            ),
+            const LogoutIconButton(),
           ],
         ),
         body: BlocBuilder<ProfileCubit, ProfileState>(

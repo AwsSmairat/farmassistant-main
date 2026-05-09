@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show Listenable;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -18,8 +19,9 @@ import '../../features/robot/presentation/pages/robot_control_page.dart';
 class AppRouter {
   AppRouter._();
 
-  static GoRouter create() {
+  static GoRouter create({Listenable? refreshListenable}) {
     return GoRouter(
+      refreshListenable: refreshListenable,
       initialLocation: '/login',
       redirect: (context, state) {
         final user = getIt<AuthRepository>().currentUser;

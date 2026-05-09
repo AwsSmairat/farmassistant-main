@@ -48,25 +48,27 @@ class _LiquidGlassBarFill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: LiquidGlassTokens.blurStrong,
-          sigmaY: LiquidGlassTokens.blurStrong,
-        ),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.surface.withValues(alpha: 0.52),
-                AppColors.surfaceVariant.withValues(alpha: 0.4),
-              ],
-            ),
-            border: Border(
-              bottom: BorderSide(
-                color: AppColors.primary.withValues(alpha: LiquidGlassTokens.borderAlphaAccent),
+    return IgnorePointer(
+      child: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: LiquidGlassTokens.blurStrong,
+            sigmaY: LiquidGlassTokens.blurStrong,
+          ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.surface.withValues(alpha: 0.52),
+                  AppColors.surfaceVariant.withValues(alpha: 0.4),
+                ],
+              ),
+              border: Border(
+                bottom: BorderSide(
+                  color: AppColors.primary.withValues(alpha: LiquidGlassTokens.borderAlphaAccent),
+                ),
               ),
             ),
           ),

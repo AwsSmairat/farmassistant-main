@@ -8,7 +8,7 @@ import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../../../../core/widgets/app_data_card.dart';
 import '../../../../core/widgets/app_header.dart';
 import '../../../../core/widgets/app_status_tag.dart';
-import '../../../auth/domain/usecases/sign_out.dart';
+import '../../../auth/presentation/widgets/logout_icon_button.dart';
 import '../../domain/entities/dashboard_data.dart';
 import '../../domain/entities/robot_status.dart';
 import '../cubit/dashboard_cubit.dart';
@@ -32,14 +32,8 @@ class DashboardPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         appBar: LiquidGlassAppBar(
           title: const Text('الرئيسية'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () async {
-                await getIt<SignOut>().call();
-                if (context.mounted) context.go('/login');
-              },
-            ),
+          actions: const [
+            LogoutIconButton(),
           ],
         ),
         body: BlocBuilder<DashboardCubit, DashboardState>(

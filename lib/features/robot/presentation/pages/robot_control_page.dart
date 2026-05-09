@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
-import '../../../auth/domain/usecases/sign_out.dart';
+import '../../../auth/presentation/widgets/logout_icon_button.dart';
 
 /// Robot control: Start/Stop, Water Pump, Auto Mode, arrows, camera, GPS.
 class RobotControlPage extends StatefulWidget {
@@ -34,14 +33,8 @@ class _RobotControlPageState extends State<RobotControlPage> {
                 onPressed: () => context.pop(),
               )
             : null,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await getIt<SignOut>().call();
-              if (context.mounted) context.go('/login');
-            },
-          ),
+        actions: const [
+          LogoutIconButton(),
         ],
       ),
       body: SafeArea(
