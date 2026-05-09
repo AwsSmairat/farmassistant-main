@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
@@ -158,6 +160,21 @@ class AuthRemoteDatasource {
     final g = _googleSignIn;
     if (g != null) {
       await g.signOut();
+    }
+    // Web (and occasionally IO): signOut's Future can settle before
+    // currentUser / auth channel updates; UI then needs another gesture to refresh.
+    if (_firebaseAuth.currentUser != null) {
+      try {
+        await _firebaseAuth
+            .authStateChanges()
+            .firstWhere((firebase_auth.User? user) => user == null)
+            .timeout(const Duration(seconds: 8));
+      } on TimeoutException {
+        // Proceed — caller still navigates; rules rely on refreshListenable.
+      }
+    }
+    if (kIsWeb) {
+      await Future<void>.delayed(Duration.zero);
     }
   }
 
