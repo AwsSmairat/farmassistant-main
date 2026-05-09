@@ -5,26 +5,20 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../models/auth_user_model.dart';
 import '../../domain/entities/auth_user.dart';
 
-GoogleSignIn _createGoogleSignIn() {
-  if (kIsWeb) {
-    const clientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
-    if (clientId.isNotEmpty) {
-      return GoogleSignIn(clientId: clientId);
-    }
-  }
-  return GoogleSignIn();
-}
-
 /// Remote auth operations. All Firebase/Google logic stays here.
+///
+/// **Web:** Google uses [FirebaseAuth.signInWithPopup] (no `google_sign_in_web` ClientID).
+/// **Mobile/desktop (IO):** Uses [GoogleSignIn] + credential exchange.
 class AuthRemoteDatasource {
   AuthRemoteDatasource({
     firebase_auth.FirebaseAuth? firebaseAuth,
     GoogleSignIn? googleSignIn,
   })  : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ?? _createGoogleSignIn();
+        _googleSignIn = kIsWeb ? null : (googleSignIn ?? GoogleSignIn());
 
   final firebase_auth.FirebaseAuth _firebaseAuth;
-  final GoogleSignIn _googleSignIn;
+  /// Null on web — avoids `google_sign_in_web` requiring OAuth Client ID in HTML.
+  final GoogleSignIn? _googleSignIn;
 
   Stream<AuthUser?> get authStateChanges =>
       _firebaseAuth.authStateChanges().map(_userOrNull);
@@ -89,16 +83,40 @@ class AuthRemoteDatasource {
   }
 
   Future<AuthUser> signInWithGoogle() async {
+    if (kIsWeb) {
+      return _signInWithGoogleWeb();
+    }
+    return _signInWithGoogleMobile();
+  }
+
+  Future<AuthUser> _signInWithGoogleWeb() async {
     try {
-      final googleUser = await _googleSignIn.signIn();
+      final provider = firebase_auth.GoogleAuthProvider();
+      provider.addScope('email');
+      provider.addScope('profile');
+      provider.setCustomParameters(const {'prompt': 'select_account'});
+      final cred = await _firebaseAuth.signInWithPopup(provider);
+      final user = cred.user;
+      if (user == null) throw Exception('فشل تسجيل الدخول بـ Google');
+      return AuthUserModel.fromFirebaseUser(user);
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      throw Exception(_authErrorMessage(e));
+    }
+  }
+
+  Future<AuthUser> _signInWithGoogleMobile() async {
+    final googleSignIn = _googleSignIn;
+    if (googleSignIn == null) {
+      throw Exception('Google Sign-In غير مهيأ على هذه المنصة.');
+    }
+    try {
+      final googleUser = await googleSignIn.signIn();
       if (googleUser == null) throw Exception('تم إلغاء تسجيل الدخول بـ Google');
       final googleAuth = await googleUser.authentication;
       final idToken = googleAuth.idToken;
-      // On Web, accessToken is often null while idToken is enough for Firebase.
       if (idToken == null) {
         throw Exception(
-          'لم يُستلم رمز تعريف من Google. على الويب: أضف GOOGLE_WEB_CLIENT_ID أو وسّم '
-          'google-signin-client_id في index.html، وفعّل Google في Firebase Authentication.',
+          'فشل الحصول على رمز تعريف من Google. تأكد من إعداد تسجيل الدخول في Firebase.',
         );
       }
       final credential = firebase_auth.GoogleAuthProvider.credential(
@@ -115,15 +133,19 @@ class AuthRemoteDatasource {
   }
 
   Future<void> signOut() async {
-    await Future.wait([
-      _firebaseAuth.signOut(),
-      _googleSignIn.signOut(),
-    ]);
+    await _firebaseAuth.signOut();
+    final g = _googleSignIn;
+    if (g != null) {
+      await g.signOut();
+    }
   }
 
   /// Maps Firebase auth error codes to user-friendly Arabic messages.
   static String _authErrorMessage(firebase_auth.FirebaseAuthException e) {
     switch (e.code) {
+      case 'popup-closed-by-user':
+      case 'cancelled-popup-request':
+        return 'تم إغلاق نافذة Google. حاول مرة أخرى.';
       case 'invalid-credential':
       case 'invalid-email':
       case 'wrong-password':
