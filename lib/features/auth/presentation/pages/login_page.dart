@@ -150,8 +150,10 @@ class _LoginViewState extends State<_LoginView> {
                 ),
               );
             }
-            if (state.status == LoginStatus.googleSignInNeedsProfile && state.user != null) {
-              _showGoogleProfileDialog(context, state.user!);
+            final googleUser = state.user;
+            if (state.status == LoginStatus.googleSignInNeedsProfile &&
+                googleUser != null) {
+              _showGoogleProfileDialog(context, googleUser);
             }
             if (state.status == LoginStatus.success) {
               context.go('/');

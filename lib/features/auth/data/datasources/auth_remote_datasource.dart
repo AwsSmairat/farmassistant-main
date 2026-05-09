@@ -94,12 +94,15 @@ class AuthRemoteDatasource {
       if (googleUser == null) throw Exception('تم إلغاء تسجيل الدخول بـ Google');
       final googleAuth = await googleUser.authentication;
       final idToken = googleAuth.idToken;
-      final accessToken = googleAuth.accessToken;
-      if (idToken == null || accessToken == null) {
-        throw Exception('فشل الحصول على بيانات Google. تأكد من إعداد تسجيل الدخول بـ Google في Firebase وملف Info.plist (iOS).');
+      // On Web, accessToken is often null while idToken is enough for Firebase.
+      if (idToken == null) {
+        throw Exception(
+          'لم يُستلم رمز تعريف من Google. على الويب: أضف GOOGLE_WEB_CLIENT_ID أو وسّم '
+          'google-signin-client_id في index.html، وفعّل Google في Firebase Authentication.',
+        );
       }
       final credential = firebase_auth.GoogleAuthProvider.credential(
-        accessToken: accessToken,
+        accessToken: googleAuth.accessToken,
         idToken: idToken,
       );
       final cred = await _firebaseAuth.signInWithCredential(credential);

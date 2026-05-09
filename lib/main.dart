@@ -42,7 +42,9 @@ class FarmAssistantApp extends StatelessWidget {
       ],
       builder: (context, child) => Directionality(
         textDirection: TextDirection.rtl,
-        child: LiquidGlassAppBackground(child: child!),
+        child: LiquidGlassAppBackground(
+          child: child ?? const SizedBox.shrink(),
+        ),
       ),
       routerConfig: AppRouter.create(),
     );
