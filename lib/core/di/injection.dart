@@ -1,5 +1,17 @@
 import 'package:get_it/get_it.dart';
 
+import '../../features/ai_plant_diagnosis/data/datasources/ai_diagnosis_callable_datasource.dart';
+import '../../features/ai_plant_diagnosis/data/datasources/ai_diagnosis_remote_datasource.dart';
+import '../../features/ai_plant_diagnosis/data/datasources/plant_image_upload_datasource.dart';
+import '../../features/ai_plant_diagnosis/data/repositories/ai_diagnosis_record_repository_impl.dart';
+import '../../features/ai_plant_diagnosis/data/services/firebase_ai_diagnosis_service.dart';
+import '../../features/ai_plant_diagnosis/data/services/mock_ai_diagnosis_service.dart';
+import '../../features/ai_plant_diagnosis/data/services/resilient_ai_diagnosis_service.dart';
+import '../../features/ai_plant_diagnosis/domain/repositories/ai_diagnosis_record_repository.dart';
+import '../../features/ai_plant_diagnosis/domain/services/ai_diagnosis_service.dart';
+import '../../features/ai_plant_diagnosis/domain/usecases/analyze_plant_image.dart';
+import '../../features/ai_plant_diagnosis/domain/usecases/save_ai_diagnosis_record.dart';
+import '../../features/ai_plant_diagnosis/presentation/cubit/ai_plant_diagnosis_cubit.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/datasources/user_profile_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -55,7 +67,9 @@ final getIt = GetIt.instance;
 
 Future<void> setupInjection() async {
   // Data sources
-  getIt.registerLazySingleton<AuthRemoteDatasource>(() => AuthRemoteDatasource());
+  getIt.registerLazySingleton<AuthRemoteDatasource>(
+    () => AuthRemoteDatasource(),
+  );
   getIt.registerLazySingleton<UserProfileRemoteDatasource>(
     () => UserProfileRemoteDatasource(),
   );
@@ -73,14 +87,18 @@ Future<void> setupInjection() async {
 
   // Use cases
   getIt.registerLazySingleton(() => SignInWithEmail(getIt<AuthRepository>()));
-  getIt.registerLazySingleton(() => SignInWithIdentifier(
-        getIt<AuthRepository>(),
-        getIt<UserProfileRepository>(),
-      ));
-  getIt.registerLazySingleton(() => CreateAccountWithEmail(
-        getIt<AuthRepository>(),
-        getIt<UserProfileRepository>(),
-      ));
+  getIt.registerLazySingleton(
+    () => SignInWithIdentifier(
+      getIt<AuthRepository>(),
+      getIt<UserProfileRepository>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => CreateAccountWithEmail(
+      getIt<AuthRepository>(),
+      getIt<UserProfileRepository>(),
+    ),
+  );
   getIt.registerLazySingleton(() => SendPasswordReset(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => SignInWithGoogle(getIt<AuthRepository>()));
   getIt.registerLazySingleton(() => SignOut(getIt<AuthRepository>()));
@@ -107,9 +125,11 @@ Future<void> setupInjection() async {
     () => ForgotPasswordCubit(getIt<SendPasswordReset>()),
   );
 
-  getIt.registerLazySingleton(() => DispatchRobotFirestoreCommands(
-        getIt<FarmFirestoreTelemetryDatasource>(),
-      ));
+  getIt.registerLazySingleton(
+    () => DispatchRobotFirestoreCommands(
+      getIt<FarmFirestoreTelemetryDatasource>(),
+    ),
+  );
 
   // Home / Dashboard (Firestore realtime)
   getIt.registerLazySingleton<DashboardRepository>(
@@ -119,7 +139,9 @@ Future<void> setupInjection() async {
       getIt<FarmFirestoreTelemetryDatasource>(),
     ),
   );
-  getIt.registerLazySingleton(() => WatchDashboardData(getIt<DashboardRepository>()));
+  getIt.registerLazySingleton(
+    () => WatchDashboardData(getIt<DashboardRepository>()),
+  );
   getIt.registerFactory<DashboardCubit>(
     () => DashboardCubit(getIt<WatchDashboardData>()),
   );
@@ -153,14 +175,13 @@ Future<void> setupInjection() async {
   );
 
   // Profile
-  getIt.registerLazySingleton(() => GetProfile(
-        getIt<AuthRepository>(),
-        getIt<UserProfileRepository>(),
-      ));
-  getIt.registerLazySingleton(() => UpdateProfile(
-        getIt<AuthRepository>(),
-        getIt<UserProfileRepository>(),
-      ));
+  getIt.registerLazySingleton(
+    () => GetProfile(getIt<AuthRepository>(), getIt<UserProfileRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () =>
+        UpdateProfile(getIt<AuthRepository>(), getIt<UserProfileRepository>()),
+  );
   getIt.registerFactory<ProfileCubit>(
     () => ProfileCubit(getIt<GetProfile>(), getIt<UpdateProfile>()),
   );
@@ -187,7 +208,8 @@ Future<void> setupInjection() async {
 
   // Sensors dashboard (Firestore realtime)
   getIt.registerLazySingleton<SensorsRemoteDatasource>(
-    () => SensorsRemoteDatasourceImpl(getIt<FarmFirestoreTelemetryDatasource>()),
+    () =>
+        SensorsRemoteDatasourceImpl(getIt<FarmFirestoreTelemetryDatasource>()),
   );
   getIt.registerLazySingleton<SensorsRepository>(
     () => SensorsRepositoryImpl(getIt<SensorsRemoteDatasource>()),
@@ -208,5 +230,46 @@ Future<void> setupInjection() async {
   );
   getIt.registerFactory<DiagnosisHistoryCubit>(
     () => DiagnosisHistoryCubit(getIt<WatchDiagnosisHistory>()),
+  );
+
+  // AI plant diagnosis: Storage + callable (Cloud Function + external AI), mock fallback
+  getIt.registerLazySingleton<PlantImageUploadDatasource>(
+    () => PlantImageUploadDatasource(),
+  );
+  getIt.registerLazySingleton<AiDiagnosisCallableDatasource>(
+    () => AiDiagnosisCallableDatasource(),
+  );
+  getIt.registerLazySingleton<AiDiagnosisRemoteDatasource>(
+    () => AiDiagnosisRemoteDatasource(
+      imageUpload: getIt<PlantImageUploadDatasource>(),
+    ),
+  );
+  getIt.registerLazySingleton<AiDiagnosisRecordRepository>(
+    () => AiDiagnosisRecordRepositoryImpl(getIt<AiDiagnosisRemoteDatasource>()),
+  );
+  getIt.registerLazySingleton<MockAiDiagnosisService>(() => MockAiDiagnosisService());
+  getIt.registerLazySingleton<FirebaseAiDiagnosisService>(
+    () => FirebaseAiDiagnosisService(
+      imageUpload: getIt<PlantImageUploadDatasource>(),
+      callable: getIt<AiDiagnosisCallableDatasource>(),
+    ),
+  );
+  getIt.registerLazySingleton<AiDiagnosisService>(
+    () => ResilientAiDiagnosisService(
+      firebase: getIt<FirebaseAiDiagnosisService>(),
+      mock: getIt<MockAiDiagnosisService>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => AnalyzePlantImage(getIt<AiDiagnosisService>()),
+  );
+  getIt.registerLazySingleton(
+    () => SaveAiDiagnosisRecord(getIt<AiDiagnosisRecordRepository>()),
+  );
+  getIt.registerFactory<AiPlantDiagnosisCubit>(
+    () => AiPlantDiagnosisCubit(
+      analyzePlantImage: getIt<AnalyzePlantImage>(),
+      saveAiDiagnosisRecord: getIt<SaveAiDiagnosisRecord>(),
+    ),
   );
 }

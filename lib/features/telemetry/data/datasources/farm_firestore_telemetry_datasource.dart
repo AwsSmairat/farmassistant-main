@@ -14,11 +14,20 @@ import '../models/farm_firestore_models.dart';
 /// Queries avoid composite indexes where possible (client-side robotId filter).
 class FarmFirestoreTelemetryDatasource {
   FarmFirestoreTelemetryDatasource({FirebaseFirestore? firestore})
-      : _db = firestore ?? FirebaseFirestore.instance;
+    : _db = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _db;
 
   String get _robotId => FarmFirestorePaths.defaultRobotId;
+
+  /// Dashboard + history include the default robot, legacy null [robotId], and phone uploads.
+  bool _includeAiDiagnosisRow(String? robotId) {
+    if (robotId == null) return true;
+    if (robotId == _robotId) return true;
+    if (robotId == FarmFirestorePaths.manualUploadRobotId) return true;
+    if (robotId == FarmFirestorePaths.externalPhoneUploadRobotId) return true;
+    return false;
+  }
 
   DocumentReference<Map<String, dynamic>> get _robotRef =>
       _db.collection(FarmFirestorePaths.robotsCollection).doc(_robotId);
@@ -54,13 +63,10 @@ class FarmFirestoreTelemetryDatasource {
     controller = StreamController<DashboardData>(
       onListen: () {
         subscriptions.add(
-          _robotRef.snapshots().listen(
-            (s) {
-              robotSnap = s;
-              emit();
-            },
-            onError: controller.addError,
-          ),
+          _robotRef.snapshots().listen((s) {
+            robotSnap = s;
+            emit();
+          }, onError: controller.addError),
         );
         subscriptions.add(
           _db
@@ -68,13 +74,10 @@ class FarmFirestoreTelemetryDatasource {
               .orderBy('createdAt', descending: true)
               .limit(40)
               .snapshots()
-              .listen(
-                (s) {
-                  sensorSnap = s;
-                  emit();
-                },
-                onError: controller.addError,
-              ),
+              .listen((s) {
+                sensorSnap = s;
+                emit();
+              }, onError: controller.addError),
         );
         subscriptions.add(
           _db
@@ -82,13 +85,10 @@ class FarmFirestoreTelemetryDatasource {
               .orderBy('createdAt', descending: true)
               .limit(80)
               .snapshots()
-              .listen(
-                (s) {
-                  aiSnap = s;
-                  emit();
-                },
-                onError: controller.addError,
-              ),
+              .listen((s) {
+                aiSnap = s;
+                emit();
+              }, onError: controller.addError),
         );
       },
       onCancel: () async {
@@ -112,7 +112,9 @@ class FarmFirestoreTelemetryDatasource {
     void emit() {
       if (controller.isClosed) return;
       try {
-        controller.add(_buildSensorsSnapshot(robotSnap: robotSnap, sensorSnap: sensorSnap));
+        controller.add(
+          _buildSensorsSnapshot(robotSnap: robotSnap, sensorSnap: sensorSnap),
+        );
       } catch (e, st) {
         controller.addError(e, st);
       }
@@ -121,13 +123,10 @@ class FarmFirestoreTelemetryDatasource {
     controller = StreamController<SensorsSnapshot>(
       onListen: () {
         subscriptions.add(
-          _robotRef.snapshots().listen(
-            (s) {
-              robotSnap = s;
-              emit();
-            },
-            onError: controller.addError,
-          ),
+          _robotRef.snapshots().listen((s) {
+            robotSnap = s;
+            emit();
+          }, onError: controller.addError),
         );
         subscriptions.add(
           _db
@@ -135,13 +134,10 @@ class FarmFirestoreTelemetryDatasource {
               .orderBy('createdAt', descending: true)
               .limit(40)
               .snapshots()
-              .listen(
-                (s) {
-                  sensorSnap = s;
-                  emit();
-                },
-                onError: controller.addError,
-              ),
+              .listen((s) {
+                sensorSnap = s;
+                emit();
+              }, onError: controller.addError),
         );
       },
       onCancel: () async {
@@ -163,56 +159,44 @@ class FarmFirestoreTelemetryDatasource {
         .limit(120)
         .snapshots()
         .map((snap) {
-      final list = <AiDiagnosisFirestoreDoc>[];
-      for (final doc in snap.docs) {
-        final row = AiDiagnosisFirestoreDoc.fromDoc(doc);
-        if (row == null) continue;
-        if (row.robotId != null && row.robotId != _robotId) continue;
-        list.add(row);
-        if (list.length >= limit) break;
-      }
-      return list;
-    });
+          final list = <AiDiagnosisFirestoreDoc>[];
+          for (final doc in snap.docs) {
+            final row = AiDiagnosisFirestoreDoc.fromDoc(doc);
+            if (row == null) continue;
+            if (!_includeAiDiagnosisRow(row.robotId)) continue;
+            list.add(row);
+            if (list.length >= limit) break;
+          }
+          return list;
+        });
   }
 
   Future<void> writeMove(String direction) async {
-    await _commandsRef.set(
-      {
-        'move': direction,
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
-      SetOptions(merge: true),
-    );
+    await _commandsRef.set({
+      'move': direction,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
   Future<void> writePump(bool on) async {
-    await _commandsRef.set(
-      {
-        'pump': on,
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
-      SetOptions(merge: true),
-    );
+    await _commandsRef.set({
+      'pump': on,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
   Future<void> writeServo(String direction) async {
-    await _commandsRef.set(
-      {
-        'servo': direction,
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
-      SetOptions(merge: true),
-    );
+    await _commandsRef.set({
+      'servo': direction,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
   Future<void> writeScanRequest() async {
-    await _commandsRef.set(
-      {
-        'scan': true,
-        'updatedAt': FieldValue.serverTimestamp(),
-      },
-      SetOptions(merge: true),
-    );
+    await _commandsRef.set({
+      'scan': true,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
   DashboardData _buildDashboard({
@@ -251,7 +235,7 @@ class FarmFirestoreTelemetryDatasource {
       for (final doc in aiSnap.docs) {
         final row = AiDiagnosisFirestoreDoc.fromDoc(doc);
         if (row == null) continue;
-        if (row.robotId != null && row.robotId != _robotId) continue;
+        if (!_includeAiDiagnosisRow(row.robotId)) continue;
         aiRows.add(row);
       }
     }
@@ -264,15 +248,18 @@ class FarmFirestoreTelemetryDatasource {
         return tb.compareTo(ta);
       });
       final top = aiRows.first;
-      final result = top.result?.trim().isNotEmpty == true ? top.result!.trim() : '—';
+      final result = top.result?.trim().isNotEmpty == true
+          ? top.result!.trim()
+          : '—';
       final confRaw = top.confidence;
       final confidence01 = confRaw == null
           ? 0.0
           : confRaw > 1
-              ? (confRaw / 100).clamp(0.0, 1.0)
-              : confRaw.clamp(0.0, 1.0);
-      final treatment =
-          top.treatment?.trim().isNotEmpty == true ? top.treatment!.trim() : '—';
+          ? (confRaw / 100).clamp(0.0, 1.0)
+          : confRaw.clamp(0.0, 1.0);
+      final treatment = top.treatment?.trim().isNotEmpty == true
+          ? top.treatment!.trim()
+          : '—';
       latestAi = AiDiagnosis(
         resultName: result,
         confidence: confidence01,
@@ -351,7 +338,8 @@ class FarmFirestoreTelemetryDatasource {
       alerts.add(
         DashboardAlert(
           title: 'بطارية منخفضة',
-          message: 'قراءة البطارية ${robot.battery!.toStringAsFixed(0)}٪ — يُنصح بالشحن.',
+          message:
+              'قراءة البطارية ${robot.battery!.toStringAsFixed(0)}٪ — يُنصح بالشحن.',
           priority: AlertPriority.high,
           time: robot.lastUpdate ?? now,
         ),
@@ -362,7 +350,8 @@ class FarmFirestoreTelemetryDatasource {
       alerts.add(
         DashboardAlert(
           title: 'انخفاض مستوى الماء',
-          message: 'المستوى حوالي ${water.toStringAsFixed(0)}٪ — راجع التزويد بالماء.',
+          message:
+              'المستوى حوالي ${water.toStringAsFixed(0)}٪ — راجع التزويد بالماء.',
           priority: AlertPriority.medium,
           time: robot.lastUpdate ?? sensor?.createdAt ?? now,
         ),

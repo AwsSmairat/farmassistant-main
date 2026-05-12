@@ -117,6 +117,10 @@ class AiDiagnosisFirestoreDoc {
     required this.treatment,
     required this.imageUrl,
     required this.createdAt,
+    this.userId,
+    this.source,
+    this.diseaseName,
+    this.explanation,
   });
 
   final String id;
@@ -126,6 +130,10 @@ class AiDiagnosisFirestoreDoc {
   final String? treatment;
   final String? imageUrl;
   final DateTime? createdAt;
+  final String? userId;
+  final String? source;
+  final String? diseaseName;
+  final String? explanation;
 
   static AiDiagnosisFirestoreDoc? fromDoc(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
     final d = doc.data();
@@ -138,6 +146,10 @@ class AiDiagnosisFirestoreDoc {
       treatment: d['treatment'] as String?,
       imageUrl: d['imageUrl'] as String?,
       createdAt: createdAt,
+      userId: d['userId'] as String?,
+      source: d['source'] as String?,
+      diseaseName: d['diseaseName'] as String?,
+      explanation: d['explanation'] as String?,
     );
   }
 }
