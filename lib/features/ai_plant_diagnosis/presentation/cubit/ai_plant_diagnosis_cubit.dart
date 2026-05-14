@@ -1,3 +1,5 @@
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -36,9 +38,42 @@ class AiPlantDiagnosisCubit extends Cubit<AiPlantDiagnosisState> {
 
   Future<void> pickFromGallery() async {
     try {
+      if (kIsWeb) {
+        final result = await FilePicker.platform.pickFiles(
+          type: FileType.image,
+          allowMultiple: false,
+          withData: true,
+        );
+        if (result == null || result.files.isEmpty) return;
+        final picked = result.files.single;
+        final bytes = picked.bytes;
+        if (bytes == null) {
+          emit(
+            state.copyWith(
+              phase: AiPlantDiagnosisPhase.error,
+              errorMessage:
+                  'تعذر قراءة الصورة من المتصفح. جرّب صورة أصغر أو متصفحاً آخر.',
+              clearSaveWarning: true,
+            ),
+          );
+          return;
+        }
+        emit(
+          state.copyWith(
+            image: XFile.fromData(bytes, name: picked.name),
+            phase: AiPlantDiagnosisPhase.imageReady,
+            clearResult: true,
+            clearError: true,
+            clearSaveWarning: true,
+          ),
+        );
+        return;
+      }
+
       final file = await _picker.pickImage(
         source: ImageSource.gallery,
         imageQuality: 82,
+        requestFullMetadata: false,
       );
       if (file == null) return;
       emit(
@@ -54,7 +89,9 @@ class AiPlantDiagnosisCubit extends Cubit<AiPlantDiagnosisState> {
       emit(
         state.copyWith(
           phase: AiPlantDiagnosisPhase.error,
-          errorMessage: 'تعذر فتح المعرض. تحقق من الأذونات وحاول مرة أخرى.',
+          errorMessage: kIsWeb
+              ? 'تعذر فتح اختيار الصور في المتصفح. تأكد أنك على رابط آمن (https)، وجرّب متصفحاً آخر أو اسمح بالوصول من إعدادات الموقع.'
+              : 'تعذر فتح المعرض. تحقق من الأذونات وحاول مرة أخرى.',
           clearSaveWarning: true,
         ),
       );
@@ -66,6 +103,7 @@ class AiPlantDiagnosisCubit extends Cubit<AiPlantDiagnosisState> {
       final file = await _picker.pickImage(
         source: ImageSource.camera,
         imageQuality: 82,
+        requestFullMetadata: false,
       );
       if (file == null) return;
       emit(
@@ -81,7 +119,9 @@ class AiPlantDiagnosisCubit extends Cubit<AiPlantDiagnosisState> {
       emit(
         state.copyWith(
           phase: AiPlantDiagnosisPhase.error,
-          errorMessage: 'تعذر فتح الكاميرا. تحقق من الأذونات وحاول مرة أخرى.',
+          errorMessage: kIsWeb
+              ? 'تعذر فتح الكاميرا من المتصفح. اسمح بالكاميرا لهذا الموقع من إعدادات المتصفح، أو اختر صورة من المعرض.'
+              : 'تعذر فتح الكاميرا. تحقق من الأذونات وحاول مرة أخرى.',
           clearSaveWarning: true,
         ),
       );

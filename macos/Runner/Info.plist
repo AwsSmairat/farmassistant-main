@@ -22,6 +22,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>نستخدم الكاميرا لالتقاط صور النباتات لمساعد التشخيص بالذكاء الاصطناعي.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>نستخدم معرض الصور لاختيار صورة نبات لتحليلها بواسطة مساعد التشخيص.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>$(PRODUCT_COPYRIGHT)</string>
 	<key>NSMainNibFile</key>
