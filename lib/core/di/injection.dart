@@ -1,3 +1,4 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../features/ai_plant_diagnosis/data/datasources/ai_diagnosis_callable_datasource.dart';
@@ -233,11 +234,21 @@ Future<void> setupInjection() async {
   );
 
   // AI plant diagnosis: Storage + callable (Cloud Function + external AI), mock fallback
+  // Callable region: default us-central1. If the function is deployed elsewhere, build with:
+  // --dart-define=FIREBASE_FUNCTIONS_REGION=europe-west1 (example).
   getIt.registerLazySingleton<PlantImageUploadDatasource>(
     () => PlantImageUploadDatasource(),
   );
   getIt.registerLazySingleton<AiDiagnosisCallableDatasource>(
-    () => AiDiagnosisCallableDatasource(),
+    () => AiDiagnosisCallableDatasource(
+      functions: FirebaseFunctions.instanceFor(
+        region: const String.fromEnvironment(
+          'FIREBASE_FUNCTIONS_REGION',
+          defaultValue: 'us-central1',
+        ),
+      ),
+      timeout: const Duration(seconds: 165),
+    ),
   );
   getIt.registerLazySingleton<AiDiagnosisRemoteDatasource>(
     () => AiDiagnosisRemoteDatasource(

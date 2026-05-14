@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -10,7 +12,7 @@ class AiDiagnosisCallableDatasource {
     FirebaseFunctions? functions,
     FirebaseAuth? auth,
     this.functionName = 'analyzePlantImage',
-    this.timeout = const Duration(seconds: 120),
+    this.timeout = const Duration(seconds: 165),
   })  : _functions = functions ?? FirebaseFunctions.instance,
         _auth = auth ?? FirebaseAuth.instance;
 
@@ -35,11 +37,18 @@ class AiDiagnosisCallableDatasource {
     );
 
     try {
-      final result = await callable.call(<String, dynamic>{
-        'imageUrl': imageUrl,
-        'userId': userId,
-        'source': source,
-      });
+      final result = await callable
+          .call(<String, dynamic>{
+            'imageUrl': imageUrl,
+            'userId': userId,
+            'source': source,
+          })
+          .timeout(
+            timeout,
+            onTimeout: () => throw const PlantDiagnosisFailure(
+              PlantDiagnosisFailureReason.analysisTimedOut,
+            ),
+          );
       final raw = result.data;
       if (raw is! Map) {
         throw const PlantDiagnosisFailure(PlantDiagnosisFailureReason.invalidAiResponse);
@@ -77,6 +86,9 @@ class AiDiagnosisCallableDatasource {
           technical: e,
         );
       case 'deadline-exceeded':
+        throw const PlantDiagnosisFailure(
+          PlantDiagnosisFailureReason.analysisTimedOut,
+        );
       case 'unavailable':
       case 'resource-exhausted':
         throw PlantDiagnosisFailure(

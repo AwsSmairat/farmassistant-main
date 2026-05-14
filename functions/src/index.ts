@@ -26,8 +26,26 @@ function stripJsonFence(text: string): string {
   return t.trim();
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => {
+      reject(new Error(`Timeout ${ms}ms: ${label}`));
+    }, ms);
+    promise.then(
+      (v) => {
+        clearTimeout(t);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(t);
+        reject(e);
+      },
+    );
+  });
+}
+
 export const analyzePlantImage = onCall(
-  {timeoutSeconds: 120, memory: "512MiB"},
+  {timeoutSeconds: 240, memory: "512MiB"},
   async (request) => {
     if (!request.auth?.uid) {
       throw new HttpsError("unauthenticated", "Authentication required");
@@ -57,7 +75,7 @@ export const analyzePlantImage = onCall(
     let imageBuffer: Buffer;
     let mimeType = "image/jpeg";
     try {
-      const res = await fetch(imageUrl);
+      const res = await fetch(imageUrl, {signal: AbortSignal.timeout(40000)});
       if (!res.ok) {
         throw new HttpsError("invalid-argument", "Could not download image from URL");
       }
@@ -76,6 +94,10 @@ export const analyzePlantImage = onCall(
       if (e instanceof HttpsError) {
         throw e;
       }
+      const err = e as {name?: string};
+      if (err?.name === "TimeoutError" || err?.name === "AbortError") {
+        throw new HttpsError("deadline-exceeded", "Image download timed out");
+      }
       logger.error("Image fetch failed", e);
       throw new HttpsError("invalid-argument", "Failed to fetch image");
     }
@@ -85,6 +107,8 @@ export const analyzePlantImage = onCall(
       model: "gemini-1.5-flash",
       generationConfig: {
         responseMimeType: "application/json",
+        maxOutputTokens: 512,
+        temperature: 0.15,
       },
     });
 
@@ -98,14 +122,33 @@ export const analyzePlantImage = onCall(
 
     let parsed: AiJson;
     try {
-      const gen = await model.generateContent([
+      const genPromise = model.generateContent([
         {inlineData: {mimeType, data: imageBuffer.toString("base64")}},
         {text: JSON_INSTRUCTION},
       ]);
-      const text = gen.response.text();
+      const gen = await withTimeout(genPromise, 130000, "gemini-generate");
+      const response = gen.response;
+      let text: string;
+      try {
+        text = typeof response.text === "function" ? response.text() : "";
+      } catch (err: unknown) {
+        logger.error("Gemini response.text failed", err);
+        throw new HttpsError("internal", "AI response invalid");
+      }
+      if (!text?.trim()) {
+        logger.error("Gemini empty text", response.promptFeedback);
+        throw new HttpsError("internal", "AI response empty");
+      }
       const cleaned = stripJsonFence(text);
       parsed = JSON.parse(cleaned) as AiJson;
     } catch (e: unknown) {
+      if (e instanceof HttpsError) {
+        throw e;
+      }
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg.includes("Timeout")) {
+        throw new HttpsError("deadline-exceeded", "AI generation timed out");
+      }
       logger.error("Gemini / JSON parse error", e);
       throw new HttpsError("internal", "AI response invalid");
     }

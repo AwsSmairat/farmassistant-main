@@ -20,6 +20,9 @@ enum PlantDiagnosisFailureReason {
 
   /// User must be signed in for cloud diagnosis.
   notAuthenticated,
+
+  /// Upload or cloud call exceeded the client/server time limit.
+  analysisTimedOut,
 }
 
 /// Exception carrying a [PlantDiagnosisFailureReason] for mapping to Arabic UI strings.
@@ -50,5 +53,7 @@ String plantDiagnosisFailureMessageAr(PlantDiagnosisFailureReason reason) {
       'خدمة التحليل السحابية غير مهيأة حالياً.',
     PlantDiagnosisFailureReason.notAuthenticated =>
       'يجب تسجيل الدخول لاستخدام التحليل السحابي.',
+    PlantDiagnosisFailureReason.analysisTimedOut =>
+      'استغرق الخادم وقتاً أطول من مهلة الانتظار (قد يحدث عند أول طلب أو عند ضغط على خدمة الذكاء الاصطناعي). انتظر قليلاً ثم اضغط «تحليل الصورة» مرة أخرى.',
   };
 }

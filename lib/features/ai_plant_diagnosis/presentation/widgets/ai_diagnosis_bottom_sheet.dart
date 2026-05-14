@@ -484,7 +484,8 @@ class _ResultSection extends StatelessWidget {
             SizedBox(width: 14),
             Expanded(
               child: Text(
-                'جاري تحليل الصورة بواسطة نموذج الذكاء الاصطناعي…',
+                'جاري تحليل الصورة بواسطة نموذج الذكاء الاصطناعي…\n'
+                'عادةً أقل من دقيقة. إذا ظهرت رسالة انتهاء المهلة، انتظر قليلاً ثم أعد المحاولة — غالباً بسبب تشغيل الخادم البارد وليس بسبب إنترنتك.',
                 style: TextStyle(
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w700,
