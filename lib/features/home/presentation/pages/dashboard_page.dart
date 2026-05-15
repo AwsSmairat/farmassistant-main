@@ -185,8 +185,6 @@ class _DashboardContent extends StatelessWidget {
                   }
                 },
                 onStartScan: () => context.push('/robot-control'),
-                onStopRobot: () => _toast(context, 'سيتم ربط إيقاف الروبوت لاحقاً.'),
-                onTogglePump: () => _toast(context, 'سيتم ربط تشغيل المضخة لاحقاً.'),
                 onViewLog: () => context.push('/diagnosis'),
               ),
             ),
@@ -235,15 +233,6 @@ class _DashboardContent extends StatelessWidget {
       ],
     );
   }
-}
-
-void _toast(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(message),
-      backgroundColor: AppColors.surface,
-    ),
-  );
 }
 
 class _HeroGreeting extends StatelessWidget {
@@ -803,15 +792,11 @@ class _QuickActionsRow extends StatelessWidget {
   const _QuickActionsRow({
     required this.onOpenControl,
     required this.onStartScan,
-    required this.onStopRobot,
-    required this.onTogglePump,
     required this.onViewLog,
   });
 
   final VoidCallback onOpenControl;
   final VoidCallback onStartScan;
-  final VoidCallback onStopRobot;
-  final VoidCallback onTogglePump;
   final VoidCallback onViewLog;
 
   @override
@@ -832,17 +817,6 @@ class _QuickActionsRow extends StatelessWidget {
           onTap: onStartScan,
         ),
         _QuickActionButton(
-          label: 'إيقاف الروبوت',
-          icon: Icons.stop_circle_outlined,
-          onTap: onStopRobot,
-          danger: true,
-        ),
-        _QuickActionButton(
-          label: 'تشغيل المضخة',
-          icon: Icons.water_outlined,
-          onTap: onTogglePump,
-        ),
-        _QuickActionButton(
           label: 'عرض السجل',
           icon: Icons.history_rounded,
           onTap: onViewLog,
@@ -858,18 +832,16 @@ class _QuickActionButton extends StatelessWidget {
     required this.icon,
     required this.onTap,
     this.primary = false,
-    this.danger = false,
   });
 
   final String label;
   final IconData icon;
   final VoidCallback onTap;
   final bool primary;
-  final bool danger;
 
   @override
   Widget build(BuildContext context) {
-    final color = danger ? AppColors.error : AppColors.primary;
+    final color = AppColors.primary;
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 160),
       child: Material(

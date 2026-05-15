@@ -45,7 +45,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
 }
 
 export const analyzePlantImage = onCall(
-  {timeoutSeconds: 240, memory: "512MiB"},
+  {timeoutSeconds: 540, memory: "512MiB"},
   async (request) => {
     if (!request.auth?.uid) {
       throw new HttpsError("unauthenticated", "Authentication required");
@@ -126,7 +126,7 @@ export const analyzePlantImage = onCall(
         {inlineData: {mimeType, data: imageBuffer.toString("base64")}},
         {text: JSON_INSTRUCTION},
       ]);
-      const gen = await withTimeout(genPromise, 130000, "gemini-generate");
+      const gen = await withTimeout(genPromise, 480000, "gemini-generate");
       const response = gen.response;
       let text: string;
       try {

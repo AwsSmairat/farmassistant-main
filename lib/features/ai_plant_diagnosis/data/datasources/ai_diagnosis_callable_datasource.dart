@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -7,19 +5,25 @@ import 'package:flutter/foundation.dart';
 import '../../domain/failures/plant_diagnosis_failure.dart';
 
 /// Calls the `analyzePlantImage` HTTPS callable (no secrets in the client).
+///
+/// [httpsCallableTimeout] is passed to [HttpsCallableOptions] only (SDK limit).
+/// There is no extra client-side [Future.timeout] on the call so the request
+/// can run until the platform or Cloud Function ends it.
 class AiDiagnosisCallableDatasource {
   AiDiagnosisCallableDatasource({
     FirebaseFunctions? functions,
     FirebaseAuth? auth,
     this.functionName = 'analyzePlantImage',
-    this.timeout = const Duration(seconds: 165),
+    this.httpsCallableTimeout = const Duration(hours: 24),
   })  : _functions = functions ?? FirebaseFunctions.instance,
         _auth = auth ?? FirebaseAuth.instance;
 
   final FirebaseFunctions _functions;
   final FirebaseAuth _auth;
   final String functionName;
-  final Duration timeout;
+
+  /// Upper bound for the callable HTTP client (not a second app-side cap).
+  final Duration httpsCallableTimeout;
 
   /// Invokes Cloud Function with [imageUrl], signed-in [userId], and [source].
   Future<Map<String, dynamic>> analyzePlantImage({
@@ -33,22 +37,15 @@ class AiDiagnosisCallableDatasource {
 
     final callable = _functions.httpsCallable(
       functionName,
-      options: HttpsCallableOptions(timeout: timeout),
+      options: HttpsCallableOptions(timeout: httpsCallableTimeout),
     );
 
     try {
-      final result = await callable
-          .call(<String, dynamic>{
-            'imageUrl': imageUrl,
-            'userId': userId,
-            'source': source,
-          })
-          .timeout(
-            timeout,
-            onTimeout: () => throw const PlantDiagnosisFailure(
-              PlantDiagnosisFailureReason.analysisTimedOut,
-            ),
-          );
+      final result = await callable.call(<String, dynamic>{
+        'imageUrl': imageUrl,
+        'userId': userId,
+        'source': source,
+      });
       final raw = result.data;
       if (raw is! Map) {
         throw const PlantDiagnosisFailure(PlantDiagnosisFailureReason.invalidAiResponse);

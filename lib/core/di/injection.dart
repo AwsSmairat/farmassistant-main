@@ -247,7 +247,6 @@ Future<void> setupInjection() async {
           defaultValue: 'us-central1',
         ),
       ),
-      timeout: const Duration(seconds: 165),
     ),
   );
   getIt.registerLazySingleton<AiDiagnosisRemoteDatasource>(

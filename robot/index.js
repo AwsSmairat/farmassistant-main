@@ -75,7 +75,7 @@ function withTimeout(promise, ms, label) {
 exports.analyzePlantImage = onCall(
     {
       secrets: [GEMINI_API_KEY],
-      timeoutSeconds: 240,
+      timeoutSeconds: 540,
       memory: "512MiB",
       maxInstances: 10,
     },
@@ -167,7 +167,7 @@ exports.analyzePlantImage = onCall(
           {inlineData: {mimeType, data: imageBuffer.toString("base64")}},
           {text: JSON_INSTRUCTION},
         ]);
-        const result = await withTimeout(genPromise, 130000, "gemini-generate");
+        const result = await withTimeout(genPromise, 480000, "gemini-generate");
         const response = result.response;
         let text;
         try {

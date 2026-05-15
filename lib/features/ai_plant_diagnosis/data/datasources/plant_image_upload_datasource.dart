@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
@@ -55,17 +53,11 @@ class PlantImageUploadDatasource {
     final ref = _storage.ref('plant_uploads/$uid/$name');
 
     try {
-      await ref
-          .putData(
-            prepared.bytes,
-            SettableMetadata(contentType: prepared.contentType),
-          )
-          .timeout(const Duration(seconds: 90));
-      return await ref
-          .getDownloadURL()
-          .timeout(const Duration(seconds: 30));
-    } on TimeoutException {
-      throw const PlantDiagnosisFailure(PlantDiagnosisFailureReason.analysisTimedOut);
+      await ref.putData(
+        prepared.bytes,
+        SettableMetadata(contentType: prepared.contentType),
+      );
+      return ref.getDownloadURL();
     } catch (e, st) {
       debugPrint('PlantImageUploadDatasource: $e\n$st');
       throw PlantDiagnosisFailure(PlantDiagnosisFailureReason.uploadFailed, technical: e);
