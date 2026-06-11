@@ -1,3 +1,17 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: farm_firestore_models.dart
+// المسار: features/telemetry/data/models/farm_firestore_models.dart
+// الطبقة: data / models — نموذج بيانات
+//
+// ماذا يفعل؟
+//   جزء من ميزة: بيانات المزرعة (Firestore). قراءة/كتابة بيانات المزرعة في Firestore.
+//
+// ماذا بداخله؟
+//   • RobotFirestoreDoc
+//   • SensorReadingFirestoreDoc
+//   • AiDiagnosisFirestoreDoc
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 double? _asDouble(dynamic v) {
@@ -10,9 +24,9 @@ DateTime? _asDate(dynamic v) {
   if (v is Timestamp) return v.toDate();
   return null;
 }
-
-/// Raw robot document under [FarmFirestorePaths.robotsCollection]/robotId.
+/// كلاس الروبوت Firestore doc.
 class RobotFirestoreDoc {
+  /// دالة الروبوت Firestore doc.
   const RobotFirestoreDoc({
     required this.statusRaw,
     required this.modeRaw,
@@ -25,16 +39,26 @@ class RobotFirestoreDoc {
     required this.exists,
   });
 
+  /// حقل: الحالة raw.
   final String? statusRaw;
+  /// حقل: وضع raw.
   final String? modeRaw;
+  /// حقل: بطارية.
   final double? battery;
+  /// حقل: مياه مستوى.
   final double? waterLevel;
+  /// حقل: مضخة الحالة.
   final dynamic pumpStatus;
+  /// حقل: GPS lat.
   final double? gpsLat;
+  /// حقل: GPS lng.
   final double? gpsLng;
+  /// حقل: last تحديث.
   final DateTime? lastUpdate;
+  /// حقل: exists.
   final bool exists;
 
+  /// دالة from لقطة.
   static RobotFirestoreDoc fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snap) {
     if (!snap.exists || snap.data() == null) {
       return const RobotFirestoreDoc(
@@ -63,9 +87,9 @@ class RobotFirestoreDoc {
     );
   }
 }
-
-/// One row in [FarmFirestorePaths.sensorReadingsCollection].
+/// كلاس المستشعر reading Firestore doc.
 class SensorReadingFirestoreDoc {
+  /// دالة المستشعر reading Firestore doc.
   const SensorReadingFirestoreDoc({
     required this.robotId,
     required this.soilMoisture,
@@ -79,17 +103,28 @@ class SensorReadingFirestoreDoc {
     required this.exists,
   });
 
+  /// حقل: الروبوت id.
   final String? robotId;
+  /// حقل: soil رطوبة.
   final double? soilMoisture;
+  /// حقل: ph.
   final double? ph;
+  /// حقل: ec.
   final double? ec;
+  /// حقل: temperature.
   final double? temperature;
+  /// حقل: humidity.
   final double? humidity;
+  /// حقل: مياه مستوى.
   final double? waterLevel;
+  /// حقل: distance.
   final double? distance;
+  /// حقل: created at.
   final DateTime? createdAt;
+  /// حقل: exists.
   final bool exists;
 
+  /// دالة from doc.
   static SensorReadingFirestoreDoc fromDoc(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
     final d = doc.data();
     return SensorReadingFirestoreDoc(
@@ -106,9 +141,9 @@ class SensorReadingFirestoreDoc {
     );
   }
 }
-
-/// One row in [FarmFirestorePaths.aiDiagnosisCollection].
+/// كلاس الذكاء الاصطناعي التشخيص Firestore doc.
 class AiDiagnosisFirestoreDoc {
+  /// دالة الذكاء الاصطناعي التشخيص Firestore doc.
   const AiDiagnosisFirestoreDoc({
     required this.id,
     required this.robotId,
@@ -123,18 +158,30 @@ class AiDiagnosisFirestoreDoc {
     this.explanation,
   });
 
+  /// حقل: id.
   final String id;
+  /// حقل: الروبوت id.
   final String? robotId;
+  /// حقل: نتيجة.
   final String? result;
+  /// حقل: confidence.
   final double? confidence;
+  /// حقل: treatment.
   final String? treatment;
+  /// حقل: الصورة url.
   final String? imageUrl;
+  /// حقل: created at.
   final DateTime? createdAt;
+  /// حقل: المستخدم id.
   final String? userId;
+  /// حقل: source.
   final String? source;
+  /// حقل: disease name.
   final String? diseaseName;
+  /// حقل: explanation.
   final String? explanation;
 
+  /// دالة from doc.
   static AiDiagnosisFirestoreDoc? fromDoc(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
     final d = doc.data();
     final createdAt = _asDate(d['createdAt']);

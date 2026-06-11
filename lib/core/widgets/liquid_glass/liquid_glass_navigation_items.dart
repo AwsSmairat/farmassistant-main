@@ -1,23 +1,41 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: liquid_glass_navigation_items.dart
+// المسار: core/widgets/liquid_glass/liquid_glass_navigation_items.dart
+// الطبقة: core / widgets — مكوّنات مشتركة
+//
+// ماذا يفعل؟
+//   جزء من البنية الأساسية للتطبيق.
+//
+// ماذا بداخله؟
+//   • LiquidGlassNavDestination
+//   • LiquidGlassNavBar
+//   • _LiquidGlassNavButton
+//   • _GlassNavPill
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter/material.dart';
 
 import '../../theme/app_colors.dart';
 import 'liquid_glass_tokens.dart';
-
-/// Single tab: icon + label, with optional frosted-glass pill when selected.
+/// كلاس زجاجي زجاج nav destination.
 class LiquidGlassNavDestination {
+  /// دالة زجاجي زجاج nav destination.
   const LiquidGlassNavDestination({
     required this.icon,
     required this.activeIcon,
     required this.label,
   });
 
+  /// حقل: أيقونة.
   final IconData icon;
+  /// حقل: active أيقونة.
   final IconData activeIcon;
+  /// حقل: label.
   final String label;
 }
-
-/// Bottom navigation row with per-item frosted glass highlight on the active tab.
+/// مكوّن واجهة: زجاجي زجاج nav شريط.
 class LiquidGlassNavBar extends StatelessWidget {
+  /// دالة زجاجي زجاج nav شريط.
   const LiquidGlassNavBar({
     super.key,
     required this.destinations,
@@ -27,13 +45,19 @@ class LiquidGlassNavBar extends StatelessWidget {
     this.unselectedColor,
   });
 
+  /// حقل: destinations.
   final List<LiquidGlassNavDestination> destinations;
+  /// حقل: current index.
   final int currentIndex;
+  /// حقل: on destination selected.
   final ValueChanged<int> onDestinationSelected;
+  /// حقل: selected color.
   final Color? selectedColor;
+  /// حقل: unselected color.
   final Color? unselectedColor;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final selected = selectedColor ?? AppColors.primary;
@@ -54,6 +78,7 @@ class LiquidGlassNavBar extends StatelessWidget {
             children: List.generate(destinations.length, (index) {
               final dest = destinations[index];
               final isSelected = index == currentIndex;
+              /// دالة expanded.
               return Expanded(
                 child: _LiquidGlassNavButton(
                   destination: dest,
@@ -72,7 +97,9 @@ class LiquidGlassNavBar extends StatelessWidget {
   }
 }
 
+/// مكوّن واجهة: زجاجي زجاج nav زر.
 class _LiquidGlassNavButton extends StatelessWidget {
+  /// دالة داخلية: زجاجي زجاج nav زر.
   const _LiquidGlassNavButton({
     required this.destination,
     required this.isSelected,
@@ -82,14 +109,21 @@ class _LiquidGlassNavButton extends StatelessWidget {
     required this.onTap,
   });
 
+  /// حقل: destination.
   final LiquidGlassNavDestination destination;
+  /// حقل: is selected.
   final bool isSelected;
+  /// حقل: selected color.
   final Color selectedColor;
+  /// حقل: unselected color.
   final Color unselectedColor;
+  /// حقل: label style.
   final TextStyle? labelStyle;
+  /// حقل: on tap.
   final VoidCallback onTap;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     final iconData = isSelected ? destination.activeIcon : destination.icon;
     final color = isSelected ? selectedColor : unselectedColor;
@@ -97,13 +131,16 @@ class _LiquidGlassNavButton extends StatelessWidget {
     final content = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+      /// دالة animated slide.
         AnimatedSlide(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOutCubic,
           offset: isSelected ? const Offset(0, -0.12) : Offset.zero,
           child: Icon(iconData, size: 24, color: color),
         ),
+        /// دالة sized box.
         const SizedBox(height: 4),
+      /// دالة نص.
         Text(
           destination.label,
           maxLines: 1,
@@ -130,6 +167,7 @@ class _LiquidGlassNavButton extends StatelessWidget {
             switchInCurve: Curves.easeOutCubic,
             switchOutCurve: Curves.easeInCubic,
             child: isSelected
+                /// دالة داخلية: زجاج nav pill.
                 ? _GlassNavPill(
                     key: const ValueKey('selected'),
                     child: content,
@@ -145,14 +183,16 @@ class _LiquidGlassNavButton extends StatelessWidget {
     );
   }
 }
-
-/// Frosted look without extra [BackdropFilter] (bar already blurs behind).
+/// كلاس زجاج nav pill.
 class _GlassNavPill extends StatelessWidget {
+  /// دالة داخلية: زجاج nav pill.
   const _GlassNavPill({super.key, required this.child});
 
+  /// حقل: child.
   final Widget child;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     final r = LiquidGlassTokens.radiusSm + 2;
     final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(r));
@@ -160,6 +200,7 @@ class _GlassNavPill extends StatelessWidget {
       decoration: ShapeDecoration(
         shape: shape,
         shadows: [
+        /// دالة box shadow.
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 10,

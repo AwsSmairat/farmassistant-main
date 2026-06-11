@@ -1,3 +1,15 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: ai_plant_diagnosis_cubit.dart
+// المسار: features/ai_plant_diagnosis/presentation/cubit/ai_plant_diagnosis_cubit.dart
+// الطبقة: presentation / cubit — منطق الواجهة
+//
+// ماذا يفعل؟
+//   جزء من ميزة: تشخيص النبات بالذكاء الاصطناعي. إدارة الحالة والأحداث (Bloc/Cubit).
+//
+// ماذا بداخله؟
+//   • AiPlantDiagnosisCubit
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +20,7 @@ import '../../domain/usecases/analyze_plant_image.dart';
 import '../../domain/usecases/save_ai_diagnosis_record.dart';
 import 'ai_plant_diagnosis_state.dart';
 
+/// منطق الواجهة (Cubit) لـ الذكاء الاصطناعي النبات التشخيص.
 class AiPlantDiagnosisCubit extends Cubit<AiPlantDiagnosisState> {
   AiPlantDiagnosisCubit({
     required AnalyzePlantImage analyzePlantImage,
@@ -16,15 +29,22 @@ class AiPlantDiagnosisCubit extends Cubit<AiPlantDiagnosisState> {
   })  : _analyzePlantImage = analyzePlantImage,
         _saveAiDiagnosisRecord = saveAiDiagnosisRecord,
         _picker = imagePicker ?? ImagePicker(),
+      /// دالة super.
         super(const AiPlantDiagnosisState());
 
+  /// حقل: تحليل النبات الصورة.
   final AnalyzePlantImage _analyzePlantImage;
+  /// حقل: حفظ الذكاء الاصطناعي التشخيص سجل.
   final SaveAiDiagnosisRecord _saveAiDiagnosisRecord;
+  /// حقل: picker.
   final ImagePicker _picker;
 
+  /// دالة إعادة تعيين.
   void reset() => emit(const AiPlantDiagnosisState());
 
+  /// يمسح الصورة.
   void clearImage() {
+  /// يصدّر حالة جديدة.
     emit(
       state.copyWith(
         clearImage: true,
@@ -36,6 +56,7 @@ class AiPlantDiagnosisCubit extends Cubit<AiPlantDiagnosisState> {
     );
   }
 
+  /// دالة pick from gallery.
   Future<void> pickFromGallery() async {
     try {
       if (kIsWeb) {
@@ -48,6 +69,7 @@ class AiPlantDiagnosisCubit extends Cubit<AiPlantDiagnosisState> {
         final picked = result.files.single;
         final bytes = picked.bytes;
         if (bytes == null) {
+        /// يصدّر حالة جديدة.
           emit(
             state.copyWith(
               phase: AiPlantDiagnosisPhase.error,
@@ -98,6 +120,7 @@ class AiPlantDiagnosisCubit extends Cubit<AiPlantDiagnosisState> {
     }
   }
 
+  /// دالة pick from الكاميرا.
   Future<void> pickFromCamera() async {
     try {
       final file = await _picker.pickImage(
@@ -128,6 +151,7 @@ class AiPlantDiagnosisCubit extends Cubit<AiPlantDiagnosisState> {
     }
   }
 
+  /// يحلّل.
   Future<void> analyze() async {
     final image = state.image;
     if (image == null) {
@@ -140,6 +164,7 @@ class AiPlantDiagnosisCubit extends Cubit<AiPlantDiagnosisState> {
       return;
     }
 
+  /// يصدّر حالة جديدة.
     emit(
       state.copyWith(
         phase: AiPlantDiagnosisPhase.analyzing,
@@ -154,6 +179,7 @@ class AiPlantDiagnosisCubit extends Cubit<AiPlantDiagnosisState> {
       String? saveWarning;
       if (!result.persistedByCloud) {
         try {
+          /// دالة داخلية: حفظ الذكاء الاصطناعي التشخيص سجل.
           await _saveAiDiagnosisRecord(result: result, image: image);
         } on PlantDiagnosisFailure catch (e) {
           saveWarning = plantDiagnosisFailureMessageAr(e.reason);
@@ -163,6 +189,7 @@ class AiPlantDiagnosisCubit extends Cubit<AiPlantDiagnosisState> {
         }
       }
       emit(
+      /// دالة الذكاء الاصطناعي النبات التشخيص الحالة.
         AiPlantDiagnosisState(
           image: image,
           phase: AiPlantDiagnosisPhase.success,
@@ -172,6 +199,7 @@ class AiPlantDiagnosisCubit extends Cubit<AiPlantDiagnosisState> {
       );
     } on PlantDiagnosisFailure catch (e) {
       emit(
+      /// دالة الذكاء الاصطناعي النبات التشخيص الحالة.
         AiPlantDiagnosisState(
           image: image,
           phase: AiPlantDiagnosisPhase.error,
@@ -180,6 +208,7 @@ class AiPlantDiagnosisCubit extends Cubit<AiPlantDiagnosisState> {
       );
     } catch (e) {
       emit(
+      /// دالة الذكاء الاصطناعي النبات التشخيص الحالة.
         AiPlantDiagnosisState(
           image: image,
           phase: AiPlantDiagnosisPhase.error,

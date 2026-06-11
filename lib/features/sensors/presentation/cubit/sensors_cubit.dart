@@ -1,3 +1,15 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: sensors_cubit.dart
+// المسار: features/sensors/presentation/cubit/sensors_cubit.dart
+// الطبقة: presentation / cubit — منطق الواجهة
+//
+// ماذا يفعل؟
+//   جزء من ميزة: المستشعرات. إدارة الحالة والأحداث (Bloc/Cubit).
+//
+// ماذا بداخله؟
+//   • SensorsCubit
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,13 +18,17 @@ import '../../domain/usecases/watch_sensors_dashboard.dart';
 import '../mappers/sensors_ui_mapper.dart';
 import 'sensors_state.dart';
 
+/// منطق الواجهة (Cubit) لـ المستشعرات.
 class SensorsCubit extends Cubit<SensorsState> {
   SensorsCubit(this._watchSensorsDashboard) : super(const SensorsInitial());
 
+  /// حقل: مراقبة المستشعرات لوحة التحكم.
   final WatchSensorsDashboard _watchSensorsDashboard;
   StreamSubscription? _sub;
 
+  /// يبدأ.
   void start() {
+  /// يصدّر حالة جديدة.
     emit(const SensorsLoading());
     _sub?.cancel();
     _sub = _watchSensorsDashboard().listen(
@@ -32,6 +48,7 @@ class SensorsCubit extends Cubit<SensorsState> {
     );
   }
 
+  /// يبدّل monitoring.
   void toggleMonitoring() {
     final current = state;
     if (current is! SensorsReady) return;
@@ -48,13 +65,16 @@ class SensorsCubit extends Cubit<SensorsState> {
       return;
     }
 
+  /// يبدأ.
     start();
   }
 
+  /// دالة check soil رطوبة.
   Future<void> checkSoilMoisture() async {
     final current = state;
     if (current is! SensorsReady) return;
 
+  /// يصدّر حالة جديدة.
     emit(SensorsReady(
       snapshot: current.snapshot,
       tiles: current.tiles,
@@ -78,6 +98,7 @@ class SensorsCubit extends Cubit<SensorsState> {
   }
 
   @override
+  /// يغلق.
   Future<void> close() {
     _sub?.cancel();
     return super.close();

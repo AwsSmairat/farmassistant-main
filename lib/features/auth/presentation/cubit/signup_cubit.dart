@@ -1,3 +1,15 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: signup_cubit.dart
+// المسار: features/auth/presentation/cubit/signup_cubit.dart
+// الطبقة: presentation / cubit — منطق الواجهة
+//
+// ماذا يفعل؟
+//   جزء من ميزة: المصادقة وتسجيل الدخول. إدارة الحالة والأحداث (Bloc/Cubit).
+//
+// ماذا بداخله؟
+//   • SignupCubit
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
@@ -10,6 +22,7 @@ import '../../domain/usecases/sign_out.dart';
 
 part 'signup_state.dart';
 
+/// منطق الواجهة (Cubit) لـ إنشاء حساب.
 class SignupCubit extends Cubit<SignupState> {
   SignupCubit({
     required CreateAccountWithEmail createAccountWithEmail,
@@ -20,19 +33,26 @@ class SignupCubit extends Cubit<SignupState> {
         _signInWithGoogle = signInWithGoogle,
         _userProfileRepository = userProfileRepository,
         _signOut = signOut,
+      /// دالة super.
         super(const SignupState.initial());
 
+  /// حقل: إنشاء حساب with البريد.
   final CreateAccountWithEmail _createAccountWithEmail;
+  /// حقل: تسجيل in with جوجل.
   final SignInWithGoogle _signInWithGoogle;
+  /// حقل: المستخدم الملف الشخصي مستودع.
   final UserProfileRepository _userProfileRepository;
+  /// حقل: تسجيل خروج.
   final SignOut _signOut;
 
+  /// ينشئ حساب with البريد.
   Future<void> createAccountWithEmail({
     required String email,
     required String password,
     required String username,
     required String phone,
   }) async {
+  /// يصدّر حالة جديدة.
     emit(const SignupState.loading());
     try {
       final user = await _createAccountWithEmail(
@@ -47,7 +67,9 @@ class SignupCubit extends Cubit<SignupState> {
     }
   }
 
+  /// يسجّل دخول with جوجل.
   Future<void> signInWithGoogle() async {
+  /// يصدّر حالة جديدة.
     emit(const SignupState.loading());
     try {
       final user = await _signInWithGoogle();
@@ -64,13 +86,16 @@ class SignupCubit extends Cubit<SignupState> {
     }
   }
 
+  /// دالة complete جوجل الملف الشخصي.
   Future<void> completeGoogleProfile({
     required AuthUser user,
     required String username,
     required String phone,
     required String password,
   }) async {
+  /// دالة assert.
     assert(password.isNotEmpty);
+  /// يصدّر حالة جديدة.
     emit(const SignupState.loading());
     try {
       final email = user.email ?? '';
@@ -98,11 +123,14 @@ class SignupCubit extends Cubit<SignupState> {
     }
   }
 
+  /// دالة cancel جوجل الملف الشخصي.
   Future<void> cancelGoogleProfile() async {
     await _signOut();
+  /// يصدّر حالة جديدة.
     emit(const SignupState.initial());
   }
 
+  /// دالة داخلية: map إنشاء حساب خطأ.
   static String _mapSignupError(Object e) {
     if (e is PermissionDeniedException) {
       return '${e.message} انشر قواعد Firestore من المجلد (ملف firestore.rules) عبر: firebase deploy --only firestore:rules';
@@ -113,5 +141,6 @@ class SignupCubit extends Cubit<SignupState> {
     return e.toString();
   }
 
+  /// دالة إعادة تعيين.
   void reset() => emit(const SignupState.initial());
 }

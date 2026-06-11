@@ -1,14 +1,26 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: mock_ai_diagnosis_service.dart
+// المسار: features/ai_plant_diagnosis/data/services/mock_ai_diagnosis_service.dart
+// الطبقة: data / services — خدمة بيانات
+//
+// ماذا يفعل؟
+//   جزء من ميزة: تشخيص النبات بالذكاء الاصطناعي. خدمة تنفيذ منطق أو اتصال خارجي.
+//
+// ماذا بداخله؟
+//   • MockAiDiagnosisService
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'dart:math';
 
 import 'package:image_picker/image_picker.dart';
 
 import '../../domain/entities/plant_diagnosis_result.dart';
 import '../../domain/services/ai_diagnosis_service.dart';
-
-/// Deterministic placeholder when Cloud Function / external AI is unavailable.
+/// خدمة وهمي الذكاء الاصطناعي التشخيص.
 class MockAiDiagnosisService implements AiDiagnosisService {
   MockAiDiagnosisService({Random? random}) : _random = random ?? Random();
 
+  /// حقل: random.
   final Random _random;
 
   static const _diseases = <({String en, String ar, String treatment, String explanation})>[
@@ -39,8 +51,10 @@ class MockAiDiagnosisService implements AiDiagnosisService {
   ];
 
   @override
+  /// يحلّل النبات الصورة.
   Future<PlantDiagnosisResult> analyzePlantImage(XFile image) async {
     await Future<void>.delayed(
+    /// دالة duration.
       Duration(milliseconds: 900 + _random.nextInt(1100)),
     );
 

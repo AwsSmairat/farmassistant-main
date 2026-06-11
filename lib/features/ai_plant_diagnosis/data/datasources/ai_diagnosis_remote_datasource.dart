@@ -1,3 +1,15 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: ai_diagnosis_remote_datasource.dart
+// المسار: features/ai_plant_diagnosis/data/datasources/ai_diagnosis_remote_datasource.dart
+// الطبقة: data / datasources — مصدر بيانات
+//
+// ماذا يفعل؟
+//   جزء من ميزة: تشخيص النبات بالذكاء الاصطناعي. الاتصال بـ Firebase أو API.
+//
+// ماذا بداخله؟
+//   • AiDiagnosisRemoteDatasource
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -7,8 +19,7 @@ import '../../../telemetry/data/firestore_paths.dart';
 import '../../domain/entities/plant_diagnosis_result.dart';
 import '../../domain/failures/plant_diagnosis_failure.dart';
 import 'plant_image_upload_datasource.dart';
-
-/// Firestore writes for mock/offline client-side persistence (cloud path writes in CF).
+/// مصدر بيانات الذكاء الاصطناعي التشخيص بعيد مصدر بيانات.
 class AiDiagnosisRemoteDatasource {
   AiDiagnosisRemoteDatasource({
     required PlantImageUploadDatasource imageUpload,
@@ -18,10 +29,14 @@ class AiDiagnosisRemoteDatasource {
         _db = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance;
 
+  /// حقل: الصورة رفع.
   final PlantImageUploadDatasource _imageUpload;
+  /// حقل: db.
   final FirebaseFirestore _db;
+  /// حقل: المصادقة.
   final FirebaseAuth _auth;
 
+  /// يحفظ phone رفع التشخيص.
   Future<void> savePhoneUploadDiagnosis({
     required PlantDiagnosisResult result,
     required XFile image,
@@ -35,6 +50,7 @@ class AiDiagnosisRemoteDatasource {
     try {
       imageUrl = await _imageUpload.uploadPhonePlantImage(image);
     } catch (e, st) {
+    /// دالة debug print.
       debugPrint('AiDiagnosisRemoteDatasource: upload $e\n$st');
       imageUrl = '';
     }

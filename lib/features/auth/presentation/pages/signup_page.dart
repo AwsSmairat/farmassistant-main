@@ -1,3 +1,17 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: signup_page.dart
+// المسار: features/auth/presentation/pages/signup_page.dart
+// الطبقة: presentation / pages — شاشة
+//
+// ماذا يفعل؟
+//   جزء من ميزة: المصادقة وتسجيل الدخول. شاشة واجهة المستخدم.
+//
+// ماذا بداخله؟
+//   • SignupPage
+//   • _SignupView
+//   • _SignupViewState
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -8,22 +22,29 @@ import '../../../../core/widgets/core_widgets.dart';
 import '../cubit/signup_cubit.dart';
 import '../widgets/google_profile_completion_dialog.dart';
 
+/// شاشة إنشاء حساب.
 class SignupPage extends StatelessWidget {
+  /// دالة إنشاء حساب صفحة.
   const SignupPage({super.key});
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return const _SignupView();
   }
 }
 
+/// مكوّن واجهة: إنشاء حساب عرض.
 class _SignupView extends StatefulWidget {
+  /// دالة داخلية: إنشاء حساب عرض.
   const _SignupView();
 
   @override
+  /// ينشئ الحالة.
   State<_SignupView> createState() => _SignupViewState();
 }
 
+/// حالة واجهة إنشاء حساب عرض.
 class _SignupViewState extends State<_SignupView> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
@@ -33,6 +54,7 @@ class _SignupViewState extends State<_SignupView> {
   final _confirmPasswordController = TextEditingController();
 
   @override
+  /// ينظف الموارد.
   void dispose() {
     _usernameController.dispose();
     _phoneController.dispose();
@@ -42,6 +64,7 @@ class _SignupViewState extends State<_SignupView> {
     super.dispose();
   }
 
+  /// دالة داخلية: submit.
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     final phoneRaw = _phoneController.text.trim().replaceAll(RegExp(r'\s'), '');
@@ -54,6 +77,7 @@ class _SignupViewState extends State<_SignupView> {
         );
   }
 
+  /// دالة داخلية: show verification حوار.
   void _showVerificationDialog(BuildContext context, String email) {
     showDialog<void>(
       context: context,
@@ -65,6 +89,7 @@ class _SignupViewState extends State<_SignupView> {
           'أرسلنا بريداً إلى $email لتأكيد حسابك.\nاضغط على الرابط في البريد ثم افتح التطبيق للمتابعة والدخول.',
         ),
         actions: [
+        /// دالة نص زر.
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
@@ -81,6 +106,7 @@ class _SignupViewState extends State<_SignupView> {
   }
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -99,6 +125,7 @@ class _SignupViewState extends State<_SignupView> {
           listener: (context, state) {
             if (state.status == SignupStatus.failure) {
               ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+              /// دالة snack شريط.
                 SnackBar(
                   content: Text(state.message ?? 'حدث خطأ'),
                   backgroundColor: AppColors.error,
@@ -111,6 +138,7 @@ class _SignupViewState extends State<_SignupView> {
               if (state.showEmailVerificationDialog) {
                 final email =
                     signedUpUser.email ?? _emailController.text.trim();
+              /// دالة داخلية: show verification حوار.
                 _showVerificationDialog(context, email);
               } else {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -125,6 +153,7 @@ class _SignupViewState extends State<_SignupView> {
                 gUser != null) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!context.mounted) return;
+              /// دالة show جوجل الملف الشخصي إكمال حوار.
                 showGoogleProfileCompletionDialog(
                   context,
                   onSubmit: ({
@@ -147,6 +176,7 @@ class _SignupViewState extends State<_SignupView> {
           },
           builder: (context, state) {
             final isLoading = state.status == SignupStatus.loading;
+            /// دالة single child scroll عرض.
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Form(
@@ -154,7 +184,9 @@ class _SignupViewState extends State<_SignupView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    /// دالة sized box.
                     const SizedBox(height: 16),
+                  /// دالة التطبيق نص حقل.
                     AppTextField(
                       controller: _usernameController,
                       label: 'اسم المستخدم',
@@ -168,7 +200,9 @@ class _SignupViewState extends State<_SignupView> {
                       },
                       autofillHints: const [AutofillHints.username],
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 16),
+                  /// دالة التطبيق نص حقل.
                     AppTextField(
                       controller: _phoneController,
                       label: 'رقم الهاتف',
@@ -194,7 +228,9 @@ class _SignupViewState extends State<_SignupView> {
                       },
                       autofillHints: const [AutofillHints.telephoneNumber],
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 16),
+                  /// دالة التطبيق نص حقل.
                     AppTextField(
                       controller: _emailController,
                       label: 'البريد الإلكتروني',
@@ -208,7 +244,9 @@ class _SignupViewState extends State<_SignupView> {
                       },
                       autofillHints: const [AutofillHints.email],
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 16),
+                  /// دالة التطبيق نص حقل.
                     AppTextField(
                       controller: _passwordController,
                       label: 'كلمة المرور',
@@ -223,7 +261,9 @@ class _SignupViewState extends State<_SignupView> {
                       },
                       autofillHints: const [AutofillHints.newPassword],
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 16),
+                  /// دالة التطبيق نص حقل.
                     AppTextField(
                       controller: _confirmPasswordController,
                       label: 'تأكيد كلمة المرور',
@@ -238,7 +278,9 @@ class _SignupViewState extends State<_SignupView> {
                       },
                       autofillHints: const [AutofillHints.newPassword],
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 28),
+                  /// دالة التطبيق رئيسي زر.
                     AppPrimaryButton(
                       label: 'إنشاء الحساب',
                       trailingIcon: true,
@@ -246,29 +288,38 @@ class _SignupViewState extends State<_SignupView> {
                       onPressed: _submit,
                       isLoading: isLoading,
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 20),
+                  /// دالة نص.
                     Text(
                       'أو التسجيل عبر',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 12),
+                  /// دالة التطبيق ثانوي زر.
                     AppSecondaryButton(
                       label: 'Google',
                       icon: Icons.g_mobiledata_rounded,
                       onPressed: isLoading ? null : () => context.read<SignupCubit>().signInWithGoogle(),
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 24),
+                  /// دالة صف.
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                      /// دالة نص.
                         Text('لديك حساب؟ ', style: Theme.of(context).textTheme.bodyMedium),
+                      /// دالة التطبيق نص رابط.
                         AppTextLink(
                           label: 'تسجيل الدخول',
                           onPressed: () => context.pop(),
                         ),
                       ],
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 32),
                   ],
                 ),

@@ -1,3 +1,16 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: settings_page.dart
+// المسار: features/profile/presentation/pages/settings_page.dart
+// الطبقة: presentation / pages — شاشة
+//
+// ماذا يفعل؟
+//   جزء من ميزة: الملف الشخصي. شاشة واجهة المستخدم.
+//
+// ماذا بداخله؟
+//   • SettingsPage
+//   • _SettingsPageState
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,24 +19,28 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../../auth/domain/usecases/send_password_reset.dart';
-
-/// Settings page: reset password and privacy policy.
+/// شاشة الإعدادات.
 class SettingsPage extends StatefulWidget {
+  /// دالة الإعدادات صفحة.
   const SettingsPage({super.key});
 
   @override
+  /// ينشئ الحالة.
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
+/// حالة واجهة الإعدادات صفحة.
 class _SettingsPageState extends State<SettingsPage> {
   bool _sendingReset = false;
 
+  /// دالة داخلية: on إعادة تعيين كلمة المرور tap.
   Future<void> _onResetPasswordTap() async {
     if (_sendingReset) return;
     final email = getIt<AuthRepository>().currentUser?.email?.trim();
     if (email == null || email.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
+        /// دالة snack شريط.
         const SnackBar(
           content: Text('لا يوجد بريد إلكتروني مرتبط بالحساب.'),
           backgroundColor: AppColors.surface,
@@ -32,6 +49,7 @@ class _SettingsPageState extends State<SettingsPage> {
       return;
     }
 
+  /// يعيّن الحالة.
     setState(() => _sendingReset = true);
     try {
       await getIt<SendPasswordReset>().call(email);
@@ -46,6 +64,7 @@ class _SettingsPageState extends State<SettingsPage> {
             style: TextStyle(color: AppColors.textPrimary),
           ),
           actions: [
+          /// دالة نص زر.
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('موافق'),
@@ -56,6 +75,7 @@ class _SettingsPageState extends State<SettingsPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
+      /// دالة snack شريط.
         SnackBar(
           content: Text(
             e is Exception ? e.toString().replaceFirst('Exception: ', '') : 'تعذر إرسال البريد',
@@ -69,6 +89,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -85,10 +106,12 @@ class _SettingsPageState extends State<SettingsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            /// دالة sized box.
             const SizedBox(height: 8),
             ElevatedButton.icon(
               onPressed: _sendingReset ? null : _onResetPasswordTap,
               icon: _sendingReset
+                  /// دالة sized box.
                   ? const SizedBox(
                       width: 16,
                       height: 16,
@@ -105,6 +128,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
             ),
+            /// دالة sized box.
             const SizedBox(height: 12),
           ],
         ),

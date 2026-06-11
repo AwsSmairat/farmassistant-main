@@ -22,6 +22,7 @@ import '../../domain/entities/robot_live_status.dart';
 
 /// حالة شاشة التحكم بالروبوت (مضخة، GPS، كاميرا، اتصال Firestore).
 class RobotControlState extends Equatable {
+  /// دالة الروبوت التحكم الحالة.
   const RobotControlState({
     this.waterPumpOn = false,
     this.autoModeOn = false,
@@ -63,6 +64,7 @@ class RobotControlState extends Equatable {
   String get cameraStreamUrl =>
       RobotCameraUrls.resolve(status.cameraUrl);
 
+  /// ينسخ الكائن مع تعديل بعض الحقول.
   RobotControlState copyWith({
     bool? waterPumpOn,
     bool? autoModeOn,
@@ -85,6 +87,7 @@ class RobotControlState extends Equatable {
   }
 
   @override
+  /// يُرجع props.
   List<Object?> get props => [
         waterPumpOn,
         autoModeOn,

@@ -1,18 +1,35 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: app_status_tag.dart
+// المسار: core/widgets/app_status_tag.dart
+// الطبقة: core / widgets — مكوّنات مشتركة
+//
+// ماذا يفعل؟
+//   جزء من البنية الأساسية للتطبيق.
+//
+// ماذا بداخله؟
+//   • AppStatusTag
+//   • enum AppStatusTagVariant
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-
-/// Small status tag (e.g. ONLINE, CHARGING, MAINTENANCE, OFFLINE).
+/// كلاس التطبيق الحالة وسم.
 class AppStatusTag extends StatelessWidget {
+  /// دالة التطبيق الحالة وسم.
   const AppStatusTag({
     super.key,
     required this.label,
     this.variant = AppStatusTagVariant.success,
   });
 
+  /// حقل: label.
   final String label;
+  /// حقل: variant.
   final AppStatusTagVariant variant;
 
+  /// دالة داخلية: color for.
   static Color _colorFor(AppStatusTagVariant v) {
+  /// دالة switch.
     switch (v) {
       case AppStatusTagVariant.success:
         return AppColors.success;
@@ -26,6 +43,7 @@ class AppStatusTag extends StatelessWidget {
   }
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     final color = _colorFor(variant);
     return Container(
@@ -48,4 +66,5 @@ class AppStatusTag extends StatelessWidget {
   }
 }
 
+/// تعداد التطبيق الحالة وسم variant.
 enum AppStatusTagVariant { success, error, warning, info }

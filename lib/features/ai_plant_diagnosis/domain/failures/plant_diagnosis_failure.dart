@@ -1,4 +1,17 @@
-/// Typed failures for phone plant diagnosis (upload, callable, parsing).
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: plant_diagnosis_failure.dart
+// المسار: features/ai_plant_diagnosis/domain/failures/plant_diagnosis_failure.dart
+// الطبقة: domain / failures — أخطاء المجال
+//
+// ماذا يفعل؟
+//   جزء من ميزة: تشخيص النبات بالذكاء الاصطناعي. جزء من ميزة تشخيص النبات بالذكاء الاصطناعي.
+//
+// ماذا بداخله؟
+//   • PlantDiagnosisFailure
+//   • enum PlantDiagnosisFailureReason
+//   • plantDiagnosisFailureMessageAr()
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+/// خطأ/فشل: النبات التشخيص فشل reason.
 enum PlantDiagnosisFailureReason {
   /// Storage upload failed.
   uploadFailed,
@@ -24,20 +37,25 @@ enum PlantDiagnosisFailureReason {
   /// Upload or cloud call exceeded the client/server time limit.
   analysisTimedOut,
 }
-
-/// Exception carrying a [PlantDiagnosisFailureReason] for mapping to Arabic UI strings.
+/// خطأ/فشل: النبات التشخيص فشل.
 class PlantDiagnosisFailure implements Exception {
+  /// دالة النبات التشخيص فشل.
   const PlantDiagnosisFailure(this.reason, {this.technical});
 
+  /// حقل: reason.
   final PlantDiagnosisFailureReason reason;
+  /// حقل: technical.
   final Object? technical;
 
   @override
+  /// دالة to string.
   String toString() => 'PlantDiagnosisFailure($reason, $technical)';
 }
 
 /// User-facing Arabic messages for [PlantDiagnosisFailure].
+/// دالة النبات التشخيص فشل message ar.
 String plantDiagnosisFailureMessageAr(PlantDiagnosisFailureReason reason) {
+  /// دالة switch.
   return switch (reason) {
     PlantDiagnosisFailureReason.uploadFailed =>
       'تعذر رفع الصورة. تحقق من الاتصال أو مساحة التخزين وحاول مرة أخرى.',

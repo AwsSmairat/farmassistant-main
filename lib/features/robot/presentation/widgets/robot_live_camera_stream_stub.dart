@@ -16,6 +16,7 @@ import '../../../../core/theme/app_colors.dart';
 
 /// احتياطي عندما لا تتوفر منصة ويب ولا IO.
 class RobotLiveCameraStream extends StatelessWidget {
+  /// دالة الروبوت مباشر الكاميرا البث.
   const RobotLiveCameraStream({
     super.key,
     required this.streamUrl,
@@ -24,12 +25,17 @@ class RobotLiveCameraStream extends StatelessWidget {
     this.onError,
   });
 
+  /// حقل: البث url.
   final String streamUrl;
+  /// حقل: reload token.
   final int reloadToken;
+  /// حقل: on ready.
   final VoidCallback? onReady;
+  /// حقل: on خطأ.
   final VoidCallback? onError;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return const ColoredBox(
       color: AppColors.surface,

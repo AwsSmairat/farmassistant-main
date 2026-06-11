@@ -1,13 +1,27 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: update_profile.dart
+// المسار: features/profile/domain/usecases/update_profile.dart
+// الطبقة: domain / usecases — حالة استخدام
+//
+// ماذا يفعل؟
+//   جزء من ميزة: الملف الشخصي. عملية منطقية واحدة (Use Case).
+//
+// ماذا بداخله؟
+//   • UpdateProfile
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../../auth/domain/repositories/user_profile_repository.dart';
-
-/// Updates the current user's profile (username and/or phone).
+/// كلاس تحديث الملف الشخصي.
 class UpdateProfile {
   UpdateProfile(this._authRepository, this._userProfileRepository);
 
+  /// حقل: المصادقة مستودع.
   final AuthRepository _authRepository;
+  /// حقل: المستخدم الملف الشخصي مستودع.
   final UserProfileRepository _userProfileRepository;
 
+  /// دالة call.
   Future<void> call({
     String? username,
     String? phone,

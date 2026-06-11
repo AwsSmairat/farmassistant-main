@@ -30,12 +30,14 @@ import '../widgets/robot_live_camera_card.dart';
 
 /// شاشة التحكم بالروبوت: كاميرا، GPS، مضخة، وضع تلقائي، ولوحة اتجاهات.
 class RobotControlPage extends StatelessWidget {
+  /// دالة الروبوت التحكم صفحة.
   const RobotControlPage({super.key, this.showBackButton = true});
 
   /// عند false (داخل HomeShell) يُخفى زر الرجوع.
   final bool showBackButton;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return BlocListener<RobotControlCubit, RobotControlState>(
       // عرض رسائل الخطأ في SnackBar.
@@ -46,6 +48,7 @@ class RobotControlPage extends StatelessWidget {
         if (msg == null) return;
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
+        /// دالة snack شريط.
           SnackBar(
             content: Text(msg),
             behavior: SnackBarBehavior.floating,
@@ -56,41 +59,50 @@ class RobotControlPage extends StatelessWidget {
       child: BlocBuilder<RobotControlCubit, RobotControlState>(
         builder: (context, state) {
           final cubit = context.read<RobotControlCubit>();
+          /// دالة scaffold.
           return Scaffold(
             backgroundColor: Colors.transparent,
             appBar: LiquidGlassAppBar(
               title: const Text('التحكم بالروبوت'),
               automaticallyImplyLeading: showBackButton,
               leading: showBackButton
+                  /// دالة أيقونة زر.
                   ? IconButton(
                       icon: const Icon(Icons.arrow_back),
                       onPressed: () => context.pop(),
                     )
                   : null,
               actions: const [
+              /// دالة تسجيل خروج أيقونة زر.
                 LogoutIconButton(),
               ],
             ),
             body: SafeArea(
               child: Stack(
                 children: [
+                /// دالة single child scroll عرض.
                   SingleChildScrollView(
                     child: Column(
                       children: [
                         // بث الكاميرا المباشر من الراسبيري باي.
+                      /// دالة الروبوت مباشر الكاميرا بطاقة.
                         RobotLiveCameraCard(
                           streamUrl: state.cameraStreamUrl,
                           isConnected:
                               state.isFirestoreConnected && state.robotOnline,
                         ),
+                        /// دالة sized box.
                         const SizedBox(height: 12),
+                      /// دالة داخلية: GPS شريط.
                         _GpsBar(
                           gpsLabel: state.gpsLabel,
                           firestoreConnected: state.isFirestoreConnected,
                           robotOnline: state.robotOnline,
                           onRefresh: cubit.requestGpsRefresh,
                         ),
+                        /// دالة sized box.
                         const SizedBox(height: 16),
+                      /// دالة داخلية: رئيسي التحكم صف.
                         _PrimaryControlRow(
                           autoModeOn: state.autoModeOn,
                           onAutoModeTap: state.isLoading
@@ -98,23 +110,29 @@ class RobotControlPage extends StatelessWidget {
                               : cubit.toggleAutoMode,
                           onStop: state.isLoading ? null : cubit.sendStop,
                         ),
+                        /// دالة sized box.
                         const SizedBox(height: 12),
+                      /// دالة داخلية: مياه مضخة صف.
                         _WaterPumpRow(
                           isOn: state.waterPumpOn,
                           onChanged: state.isLoading ? null : cubit.setPump,
                           onTap: state.isLoading ? null : cubit.togglePump,
                         ),
+                        /// دالة sized box.
                         const SizedBox(height: 16),
+                      /// دالة داخلية: direction لوحة.
                         _DirectionPad(
                           enabled: !state.isLoading,
                           onMove: cubit.sendMove,
                         ),
+                        /// دالة sized box.
                         const SizedBox(height: 24),
                       ],
                     ),
                   ),
                   // شريط تقدم أثناء إرسال أمر إلى Firestore.
                   if (state.isLoading)
+                    /// دالة positioned.
                     const Positioned(
                       top: 0,
                       left: 0,
@@ -137,6 +155,7 @@ class RobotControlPage extends StatelessWidget {
 
 /// شريط GPS مع مؤشر الاتصال — الضغط يطلب تحديث الإحداثيات.
 class _GpsBar extends StatelessWidget {
+  /// دالة داخلية: GPS شريط.
   const _GpsBar({
     required this.gpsLabel,
     required this.firestoreConnected,
@@ -144,9 +163,13 @@ class _GpsBar extends StatelessWidget {
     required this.onRefresh,
   });
 
+  /// حقل: GPS label.
   final String gpsLabel;
+  /// حقل: Firestore connected.
   final bool firestoreConnected;
+  /// حقل: الروبوت متصل.
   final bool robotOnline;
+  /// حقل: on تحديث.
   final VoidCallback onRefresh;
 
   String get _subtitle {
@@ -156,6 +179,7 @@ class _GpsBar extends StatelessWidget {
   }
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -173,6 +197,7 @@ class _GpsBar extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
+              /// دالة container.
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -187,14 +212,18 @@ class _GpsBar extends StatelessWidget {
                     size: 22,
                   ),
                 ),
+                /// دالة sized box.
                 const SizedBox(width: 12),
+              /// دالة expanded.
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                    /// دالة صف.
                       Row(
                         children: [
+                          /// دالة نص.
                           const Text(
                             'GPS',
                             style: TextStyle(
@@ -203,14 +232,18 @@ class _GpsBar extends StatelessWidget {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
+                          /// دالة sized box.
                           const SizedBox(width: 8),
+                        /// دالة داخلية: اتصال نقطة.
                           _ConnectionDot(
                             firestoreConnected: firestoreConnected,
                             robotOnline: robotOnline,
                           ),
                         ],
                       ),
+                      /// دالة sized box.
                       const SizedBox(height: 2),
+                    /// دالة نص.
                       Text(
                         _subtitle,
                         style: const TextStyle(
@@ -233,16 +266,21 @@ class _GpsBar extends StatelessWidget {
 
 /// نقطة ملوّنة: أصفر=Firestore، أحمر=روبوت غير متصل، أخضر=متصل.
 class _ConnectionDot extends StatelessWidget {
+  /// دالة داخلية: اتصال نقطة.
   const _ConnectionDot({
     required this.firestoreConnected,
     required this.robotOnline,
   });
 
+  /// حقل: Firestore connected.
   final bool firestoreConnected;
+  /// حقل: الروبوت متصل.
   final bool robotOnline;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
+    /// حقل: color.
     final Color color;
     if (!firestoreConnected) {
       color = AppColors.warning;
@@ -261,22 +299,28 @@ class _ConnectionDot extends StatelessWidget {
 
 /// صف الأزرار الرئيسية: الوضع التلقائي وإيقاف الطوارئ.
 class _PrimaryControlRow extends StatelessWidget {
+  /// دالة داخلية: رئيسي التحكم صف.
   const _PrimaryControlRow({
     required this.autoModeOn,
     required this.onAutoModeTap,
     required this.onStop,
   });
 
+  /// حقل: تلقائي وضع on.
   final bool autoModeOn;
+  /// حقل: on تلقائي وضع tap.
   final VoidCallback? onAutoModeTap;
+  /// حقل: on stop.
   final VoidCallback? onStop;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
+        /// دالة expanded.
           Expanded(
             child: _ActionButton(
               label: autoModeOn ? 'Auto On' : 'Auto Mode',
@@ -285,7 +329,9 @@ class _PrimaryControlRow extends StatelessWidget {
               onPressed: onAutoModeTap,
             ),
           ),
+          /// دالة sized box.
           const SizedBox(width: 12),
+        /// دالة expanded.
           Expanded(
             child: _ActionButton(
               label: 'Stop',
@@ -302,6 +348,7 @@ class _PrimaryControlRow extends StatelessWidget {
 
 /// زر إجراء ملوّن (Auto Mode / Stop).
 class _ActionButton extends StatelessWidget {
+  /// دالة داخلية: إجراء زر.
   const _ActionButton({
     required this.label,
     required this.icon,
@@ -309,12 +356,17 @@ class _ActionButton extends StatelessWidget {
     required this.onPressed,
   });
 
+  /// حقل: label.
   final String label;
+  /// حقل: أيقونة.
   final IconData icon;
+  /// حقل: color.
   final Color color;
+  /// حقل: on pressed.
   final VoidCallback? onPressed;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return Material(
       color: color.withValues(alpha: 0.25),
@@ -328,8 +380,11 @@ class _ActionButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+            /// دالة أيقونة.
               Icon(icon, color: color, size: 22),
+              /// دالة sized box.
               const SizedBox(width: 8),
+            /// دالة نص.
               Text(
                 label,
                 style: TextStyle(
@@ -348,30 +403,42 @@ class _ActionButton extends StatelessWidget {
 
 /// بطاقة مضخة المياه مع مفتاح تشغيل/إيقاف.
 class _WaterPumpRow extends StatelessWidget {
+  /// دالة داخلية: مياه مضخة صف.
   const _WaterPumpRow({
     required this.isOn,
     required this.onChanged,
     required this.onTap,
   });
 
+  /// حقل: is on.
   final bool isOn;
+  /// حقل: on changed.
   final ValueChanged<bool>? onChanged;
+  /// حقل: on tap.
   final VoidCallback? onTap;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
+    /// حقل: بطاقة color.
     final Color cardColor = isOn
         ? AppColors.accentBlue.withValues(alpha: 0.18)
         : AppColors.error.withValues(alpha: 0.16);
+    /// حقل: border color.
     final Color borderColor = isOn
         ? AppColors.accentBlue.withValues(alpha: 0.55)
         : AppColors.error.withValues(alpha: 0.5);
+    /// حقل: أيقونة bg.
     final Color iconBg = isOn
         ? AppColors.accentBlue.withValues(alpha: 0.35)
         : AppColors.error.withValues(alpha: 0.28);
+    /// حقل: accent.
     final Color accent = isOn ? AppColors.accentBlue : AppColors.error;
+    /// حقل: الحالة color.
     final Color statusColor = accent;
+    /// حقل: splash.
     final Color splash = accent.withValues(alpha: 0.14);
+    /// حقل: highlight.
     final Color highlight = accent.withValues(alpha: 0.09);
 
     return Padding(
@@ -393,6 +460,7 @@ class _WaterPumpRow extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
+              /// دالة container.
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -405,12 +473,15 @@ class _WaterPumpRow extends StatelessWidget {
                     size: 22,
                   ),
                 ),
+                /// دالة sized box.
                 const SizedBox(width: 12),
+              /// دالة expanded.
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                    /// دالة نص.
                       Text(
                         'مضخة المياه',
                         style: const TextStyle(
@@ -419,6 +490,7 @@ class _WaterPumpRow extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
+                    /// دالة نص.
                       Text(
                         isOn ? 'تشغيل' : 'إيقاف',
                         style: TextStyle(
@@ -430,6 +502,7 @@ class _WaterPumpRow extends StatelessWidget {
                     ],
                   ),
                 ),
+              /// دالة switch.
                 Switch(
                   value: isOn,
                   onChanged: onChanged,
@@ -457,20 +530,25 @@ class _WaterPumpRow extends StatelessWidget {
 
 /// لوحة دائرية للتحكم بالاتجاهات (أمام، خلف، يسار، يمين).
 class _DirectionPad extends StatelessWidget {
+  /// دالة داخلية: direction لوحة.
   const _DirectionPad({
     required this.enabled,
     required this.onMove,
   });
 
+  /// حقل: enabled.
   final bool enabled;
+  /// دالة function.
   final Future<void> Function(String direction) onMove;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
+          /// دالة نص.
           const Text(
             'لوحة التحكم بالحركة',
             style: TextStyle(
@@ -479,7 +557,9 @@ class _DirectionPad extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
+          /// دالة sized box.
           const SizedBox(height: 10),
+        /// دالة center.
           Center(
             child: SizedBox(
               width: 240,
@@ -487,6 +567,7 @@ class _DirectionPad extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
+                /// دالة container.
                   Container(
                     width: 240,
                     height: 240,
@@ -495,6 +576,7 @@ class _DirectionPad extends StatelessWidget {
                       color: AppColors.surface,
                       border: Border.all(color: AppColors.border, width: 1.4),
                       boxShadow: [
+                      /// دالة box shadow.
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.24),
                           blurRadius: 14,
@@ -503,6 +585,7 @@ class _DirectionPad extends StatelessWidget {
                       ],
                     ),
                   ),
+                /// دالة container.
                   Container(
                     width: 164,
                     height: 164,
@@ -514,6 +597,7 @@ class _DirectionPad extends StatelessWidget {
                       ),
                     ),
                   ),
+                /// دالة container.
                   Container(
                     width: 88,
                     height: 88,
@@ -528,6 +612,7 @@ class _DirectionPad extends StatelessWidget {
                       size: 32,
                     ),
                   ),
+                /// دالة positioned.
                   Positioned(
                     top: 18,
                     child: _ArrowButton(
@@ -537,6 +622,7 @@ class _DirectionPad extends StatelessWidget {
                       onPressed: () => onMove('forward'),
                     ),
                   ),
+                /// دالة positioned.
                   Positioned(
                     bottom: 18,
                     child: _ArrowButton(
@@ -546,6 +632,7 @@ class _DirectionPad extends StatelessWidget {
                       onPressed: () => onMove('backward'),
                     ),
                   ),
+                /// دالة positioned.
                   Positioned(
                     left: 18,
                     child: _ArrowButton(
@@ -555,6 +642,7 @@ class _DirectionPad extends StatelessWidget {
                       onPressed: () => onMove('left'),
                     ),
                   ),
+                /// دالة positioned.
                   Positioned(
                     right: 18,
                     child: _ArrowButton(
@@ -576,6 +664,7 @@ class _DirectionPad extends StatelessWidget {
 
 /// زر سهم واحد في لوحة الاتجاهات.
 class _ArrowButton extends StatelessWidget {
+  /// دالة داخلية: سهم زر.
   const _ArrowButton({
     required this.icon,
     required this.semanticLabel,
@@ -583,12 +672,17 @@ class _ArrowButton extends StatelessWidget {
     this.enabled = true,
   });
 
+  /// حقل: أيقونة.
   final IconData icon;
+  /// حقل: semantic label.
   final String semanticLabel;
+  /// حقل: on pressed.
   final VoidCallback? onPressed;
+  /// حقل: enabled.
   final bool enabled;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return Semantics(
       label: semanticLabel,
@@ -606,6 +700,7 @@ class _ArrowButton extends StatelessWidget {
               color: AppColors.surfaceVariant,
               border: Border.all(color: AppColors.border),
               boxShadow: [
+              /// دالة box shadow.
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.18),
                   blurRadius: 7,

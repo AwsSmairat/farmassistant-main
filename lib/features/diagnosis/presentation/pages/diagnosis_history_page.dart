@@ -1,3 +1,16 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: diagnosis_history_page.dart
+// المسار: features/diagnosis/presentation/pages/diagnosis_history_page.dart
+// الطبقة: presentation / pages — شاشة
+//
+// ماذا يفعل؟
+//   جزء من ميزة: سجل تشخيص النبات. شاشة واجهة المستخدم.
+//
+// ماذا بداخله؟
+//   • DiagnosisHistoryPage
+//   • _relativeArabic()
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -5,12 +18,13 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../cubit/diagnosis_history_cubit.dart';
 import '../cubit/diagnosis_history_state.dart';
-
-/// Diagnosis history from Firestore `ai_diagnosis` (realtime).
+/// شاشة التشخيص السجل.
 class DiagnosisHistoryPage extends StatelessWidget {
+  /// دالة التشخيص السجل صفحة.
   const DiagnosisHistoryPage({super.key});
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -20,23 +34,28 @@ class DiagnosisHistoryPage extends StatelessWidget {
       body: BlocBuilder<DiagnosisHistoryCubit, DiagnosisHistoryState>(
         builder: (context, state) {
           if (state is DiagnosisHistoryLoading || state is DiagnosisHistoryInitial) {
+            /// دالة center.
             return const Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             );
           }
           if (state is DiagnosisHistoryFailure) {
+            /// دالة center.
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                  /// دالة نص.
                     Text(
                       state.message,
                       textAlign: TextAlign.center,
                       style: const TextStyle(color: AppColors.error),
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 16),
+                  /// دالة نص زر.
                     TextButton(
                       onPressed: () =>
                           context.read<DiagnosisHistoryCubit>().start(),
@@ -49,6 +68,7 @@ class DiagnosisHistoryPage extends StatelessWidget {
           }
           final records = (state as DiagnosisHistoryReady).records;
           if (records.isEmpty) {
+            /// دالة center.
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -77,6 +97,7 @@ class DiagnosisHistoryPage extends StatelessWidget {
               final r = records[index];
               final color = r.isHealthy ? AppColors.success : AppColors.warning;
               final pct = (r.confidence * 100).clamp(0, 100).toStringAsFixed(0);
+              /// دالة زجاجي زجاج لوحة.
               return LiquidGlassPanel(
                 borderRadius: LiquidGlassTokens.radiusSm,
                 blurSigma: LiquidGlassTokens.blurSoft,
@@ -85,6 +106,7 @@ class DiagnosisHistoryPage extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                  /// دالة container.
                     Container(
                       width: 40,
                       height: 40,
@@ -101,11 +123,14 @@ class DiagnosisHistoryPage extends StatelessWidget {
                         size: 22,
                       ),
                     ),
+                    /// دالة sized box.
                     const SizedBox(width: 12),
+                  /// دالة expanded.
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                        /// دالة نص.
                           Text(
                             r.resultName,
                             style: const TextStyle(
@@ -113,7 +138,9 @@ class DiagnosisHistoryPage extends StatelessWidget {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
+                          /// دالة sized box.
                           const SizedBox(height: 4),
+                        /// دالة نص.
                           Text(
                             'الثقة: $pct٪ · ${_relativeArabic(r.createdAt)}',
                             style: const TextStyle(
@@ -124,7 +151,9 @@ class DiagnosisHistoryPage extends StatelessWidget {
                           ),
                           if (r.suggestedTreatment.isNotEmpty &&
                               r.suggestedTreatment != '—') ...[
+                            /// دالة sized box.
                             const SizedBox(height: 8),
+                          /// دالة نص.
                             Text(
                               r.suggestedTreatment,
                               style: const TextStyle(
@@ -137,6 +166,7 @@ class DiagnosisHistoryPage extends StatelessWidget {
                         ],
                       ),
                     ),
+                  /// دالة أيقونة.
                     Icon(
                       Icons.chevron_right,
                       color: AppColors.textMuted.withValues(alpha: 0.9),
@@ -152,6 +182,7 @@ class DiagnosisHistoryPage extends StatelessWidget {
   }
 }
 
+/// دالة داخلية: relative arabic.
 String _relativeArabic(DateTime dt) {
   final diff = DateTime.now().difference(dt);
   if (diff.inMinutes < 1) return 'الآن';

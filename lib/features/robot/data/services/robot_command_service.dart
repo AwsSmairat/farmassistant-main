@@ -26,6 +26,7 @@ class RobotCommandService {
   RobotCommandService({FirebaseFirestore? firestore})
       : _db = firestore ?? FirebaseFirestore.instance;
 
+  /// حقل: db.
   final FirebaseFirestore _db;
 
   /// معرّف الروبوت الافتراضي.
@@ -77,6 +78,7 @@ class RobotCommandService {
         ...fields,
         'updatedAt': FieldValue.serverTimestamp(),
       },
+    /// دالة set إعدادات.
       SetOptions(merge: true),
     );
   }

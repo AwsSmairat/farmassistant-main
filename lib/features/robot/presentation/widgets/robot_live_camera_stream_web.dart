@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 
 /// Flutter Web: عرض بث MJPEG عبر iframe بملء الحاوية بدون إطار.
 class RobotLiveCameraStream extends StatefulWidget {
+  /// دالة الروبوت مباشر الكاميرا البث.
   const RobotLiveCameraStream({
     super.key,
     required this.streamUrl,
@@ -32,13 +33,17 @@ class RobotLiveCameraStream extends StatefulWidget {
 
   /// رقم إعادة التحميل — يُستخدم في ValueKey لإنشاء iframe جديد.
   final int reloadToken;
+  /// حقل: on ready.
   final VoidCallback? onReady;
+  /// حقل: on خطأ.
   final VoidCallback? onError;
 
   @override
+  /// ينشئ الحالة.
   State<RobotLiveCameraStream> createState() => _RobotLiveCameraStreamState();
 }
 
+/// حالة واجهة الروبوت مباشر الكاميرا البث.
 class _RobotLiveCameraStreamState extends State<RobotLiveCameraStream> {
   /// عداد فريد لتسجيل كل iframe في platformViewRegistry.
   static int _nextViewId = 0;
@@ -47,6 +52,7 @@ class _RobotLiveCameraStreamState extends State<RobotLiveCameraStream> {
   late final String _viewType;
 
   @override
+  /// يهيّئ الويدجت.
   void initState() {
     super.initState();
     _viewType = _registerView(widget.streamUrl);
@@ -87,6 +93,7 @@ class _RobotLiveCameraStreamState extends State<RobotLiveCameraStream> {
   }
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return SizedBox.expand(
       child: HtmlElementView(viewType: _viewType),

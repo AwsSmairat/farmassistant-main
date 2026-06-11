@@ -1,8 +1,20 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: app_filter_chip.dart
+// المسار: core/widgets/app_filter_chip.dart
+// الطبقة: core / widgets — مكوّنات مشتركة
+//
+// ماذا يفعل؟
+//   جزء من البنية الأساسية للتطبيق.
+//
+// ماذا بداخله؟
+//   • AppFilterChip
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-
-/// Pill-shaped filter chip: selected = orange bg, unselected = dark bg. Optional leading dot.
+/// كلاس التطبيق فلتر شريحة.
 class AppFilterChip extends StatelessWidget {
+  /// دالة التطبيق فلتر شريحة.
   const AppFilterChip({
     super.key,
     required this.label,
@@ -11,13 +23,18 @@ class AppFilterChip extends StatelessWidget {
     this.dotColor,
   });
 
+  /// حقل: label.
   final String label;
+  /// حقل: selected.
   final bool selected;
+  /// حقل: on selected.
   final ValueChanged<bool> onSelected;
   /// Optional status dot color (e.g. green for Online, blue for Charging).
+  /// حقل: نقطة color.
   final Color? dotColor;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return Material(
       color: selected ? AppColors.primary : AppColors.surface,
@@ -31,6 +48,7 @@ class AppFilterChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (dotColor != null) ...[
+              /// دالة container.
                 Container(
                   width: 8,
                   height: 8,
@@ -39,8 +57,10 @@ class AppFilterChip extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
+                /// دالة sized box.
                 const SizedBox(width: 8),
               ],
+            /// دالة نص.
               Text(
                 label,
                 style: TextStyle(

@@ -1,3 +1,15 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: privacy_policy_page.dart
+// المسار: features/profile/presentation/pages/privacy_policy_page.dart
+// الطبقة: presentation / pages — شاشة
+//
+// ماذا يفعل؟
+//   جزء من ميزة: الملف الشخصي. شاشة واجهة المستخدم.
+//
+// ماذا بداخله؟
+//   • PrivacyPolicyPage
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,12 +19,13 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../cubit/privacy_policy_cubit.dart';
 import '../cubit/privacy_policy_state.dart';
-
-/// User-facing privacy policy page.
+/// شاشة الخصوصية السياسة.
 class PrivacyPolicyPage extends StatelessWidget {
+  /// دالة الخصوصية السياسة صفحة.
   const PrivacyPolicyPage({super.key});
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<PrivacyPolicyCubit>()..load(),
@@ -29,11 +42,13 @@ class PrivacyPolicyPage extends StatelessWidget {
         body: BlocBuilder<PrivacyPolicyCubit, PrivacyPolicyState>(
           builder: (context, state) {
             if (state is PrivacyPolicyLoading || state is PrivacyPolicyInitial) {
+              /// دالة center.
               return const Center(
                 child: CircularProgressIndicator(color: AppColors.primary),
               );
             }
             if (state is PrivacyPolicyFailure) {
+              /// دالة center.
               return Center(
                 child: Text(
                   state.message,
@@ -42,6 +57,7 @@ class PrivacyPolicyPage extends StatelessWidget {
               );
             }
             final content = state is PrivacyPolicyLoaded ? state.content : '';
+            /// دالة padding.
             return Padding(
               padding: const EdgeInsets.all(16),
               child: SingleChildScrollView(

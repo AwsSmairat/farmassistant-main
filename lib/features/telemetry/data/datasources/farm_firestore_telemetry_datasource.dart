@@ -1,3 +1,15 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: farm_firestore_telemetry_datasource.dart
+// المسار: features/telemetry/data/datasources/farm_firestore_telemetry_datasource.dart
+// الطبقة: data / datasources — مصدر بيانات
+//
+// ماذا يفعل؟
+//   جزء من ميزة: بيانات المزرعة (Firestore). الاتصال بـ Firebase أو API — قراءة/كتابة بيانات المزرعة في Firestore.
+//
+// ماذا بداخله؟
+//   • FarmFirestoreTelemetryDatasource
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,16 +23,19 @@ import '../models/farm_firestore_models.dart';
 
 /// Central Firestore realtime telemetry + robot commands.
 ///
-/// Queries avoid composite indexes where possible (client-side robotId filter).
+/// مصدر بيانات المزرعة Firestore البيانات مصدر بيانات.
 class FarmFirestoreTelemetryDatasource {
   FarmFirestoreTelemetryDatasource({FirebaseFirestore? firestore})
     : _db = firestore ?? FirebaseFirestore.instance;
 
+  /// حقل: db.
   final FirebaseFirestore _db;
 
+  /// يُرجع الروبوت id.
   String get _robotId => FarmFirestorePaths.defaultRobotId;
 
   /// Dashboard + history include the default robot, legacy null [robotId], and phone uploads.
+  /// دالة داخلية: include الذكاء الاصطناعي التشخيص صف.
   bool _includeAiDiagnosisRow(String? robotId) {
     if (robotId == null) return true;
     if (robotId == _robotId) return true;
@@ -29,25 +44,31 @@ class FarmFirestoreTelemetryDatasource {
     return false;
   }
 
+  /// يُرجع الروبوت ref.
   DocumentReference<Map<String, dynamic>> get _robotRef =>
       _db.collection(FarmFirestorePaths.robotsCollection).doc(_robotId);
 
+  /// يُرجع أوامر ref.
   DocumentReference<Map<String, dynamic>> get _commandsRef =>
       _db.collection(FarmFirestorePaths.commandsCollection).doc(_robotId);
 
   /// Combined dashboard: robot doc + latest sensor row + recent AI rows (filtered).
+  /// يراقب بثاً مباشراً لـ لوحة التحكم.
   Stream<DashboardData> watchDashboard({required String username}) {
     DocumentSnapshot<Map<String, dynamic>>? robotSnap;
     QuerySnapshot<Map<String, dynamic>>? sensorSnap;
     QuerySnapshot<Map<String, dynamic>>? aiSnap;
 
+    /// حقل: controller.
     late final StreamController<DashboardData> controller;
     final subscriptions = <StreamSubscription<dynamic>>[];
 
+    /// يصدّر حالة جديدة.
     void emit() {
       if (controller.isClosed) return;
       try {
         controller.add(
+        /// دالة داخلية: build لوحة التحكم.
           _buildDashboard(
             username: username,
             robotSnap: robotSnap,
@@ -65,6 +86,7 @@ class FarmFirestoreTelemetryDatasource {
         subscriptions.add(
           _robotRef.snapshots().listen((s) {
             robotSnap = s;
+          /// يصدّر حالة جديدة.
             emit();
           }, onError: controller.addError),
         );
@@ -76,6 +98,7 @@ class FarmFirestoreTelemetryDatasource {
               .snapshots()
               .listen((s) {
                 sensorSnap = s;
+              /// يصدّر حالة جديدة.
                 emit();
               }, onError: controller.addError),
         );
@@ -87,6 +110,7 @@ class FarmFirestoreTelemetryDatasource {
               .snapshots()
               .listen((s) {
                 aiSnap = s;
+              /// يصدّر حالة جديدة.
                 emit();
               }, onError: controller.addError),
         );
@@ -102,17 +126,21 @@ class FarmFirestoreTelemetryDatasource {
     return controller.stream;
   }
 
+  /// يراقب بثاً مباشراً لـ المستشعرات لقطة.
   Stream<SensorsSnapshot> watchSensorsSnapshot() {
     DocumentSnapshot<Map<String, dynamic>>? robotSnap;
     QuerySnapshot<Map<String, dynamic>>? sensorSnap;
 
+    /// حقل: controller.
     late final StreamController<SensorsSnapshot> controller;
     final subscriptions = <StreamSubscription<dynamic>>[];
 
+    /// يصدّر حالة جديدة.
     void emit() {
       if (controller.isClosed) return;
       try {
         controller.add(
+        /// دالة داخلية: build المستشعرات لقطة.
           _buildSensorsSnapshot(robotSnap: robotSnap, sensorSnap: sensorSnap),
         );
       } catch (e, st) {
@@ -125,6 +153,7 @@ class FarmFirestoreTelemetryDatasource {
         subscriptions.add(
           _robotRef.snapshots().listen((s) {
             robotSnap = s;
+          /// يصدّر حالة جديدة.
             emit();
           }, onError: controller.addError),
         );
@@ -136,6 +165,7 @@ class FarmFirestoreTelemetryDatasource {
               .snapshots()
               .listen((s) {
                 sensorSnap = s;
+              /// يصدّر حالة جديدة.
                 emit();
               }, onError: controller.addError),
         );
@@ -152,6 +182,7 @@ class FarmFirestoreTelemetryDatasource {
   }
 
   /// Raw diagnosis rows for `robot_001` (newest first, capped).
+  /// يراقب بثاً مباشراً لـ الذكاء الاصطناعي التشخيص docs.
   Stream<List<AiDiagnosisFirestoreDoc>> watchAiDiagnosisDocs({int limit = 50}) {
     return _db
         .collection(FarmFirestorePaths.aiDiagnosisCollection)
@@ -160,6 +191,7 @@ class FarmFirestoreTelemetryDatasource {
         .snapshots()
         .map((snap) {
           final list = <AiDiagnosisFirestoreDoc>[];
+        /// دالة for.
           for (final doc in snap.docs) {
             final row = AiDiagnosisFirestoreDoc.fromDoc(doc);
             if (row == null) continue;
@@ -171,6 +203,7 @@ class FarmFirestoreTelemetryDatasource {
         });
   }
 
+  /// دالة write حركة.
   Future<void> writeMove(String direction) async {
     await _commandsRef.set({
       'move': direction,
@@ -178,6 +211,7 @@ class FarmFirestoreTelemetryDatasource {
     }, SetOptions(merge: true));
   }
 
+  /// دالة write مضخة.
   Future<void> writePump(bool on) async {
     await _commandsRef.set({
       'pump': on,
@@ -185,6 +219,7 @@ class FarmFirestoreTelemetryDatasource {
     }, SetOptions(merge: true));
   }
 
+  /// دالة write servo.
   Future<void> writeServo(String direction) async {
     await _commandsRef.set({
       'servo': direction,
@@ -192,6 +227,7 @@ class FarmFirestoreTelemetryDatasource {
     }, SetOptions(merge: true));
   }
 
+  /// دالة write scan طلب.
   Future<void> writeScanRequest() async {
     await _commandsRef.set({
       'scan': true,
@@ -199,6 +235,7 @@ class FarmFirestoreTelemetryDatasource {
     }, SetOptions(merge: true));
   }
 
+  /// دالة داخلية: build لوحة التحكم.
   DashboardData _buildDashboard({
     required String username,
     required DocumentSnapshot<Map<String, dynamic>>? robotSnap,
@@ -292,6 +329,7 @@ class FarmFirestoreTelemetryDatasource {
     );
   }
 
+  /// دالة داخلية: derive daily stats.
   DailyStats? _deriveDailyStats(List<AiDiagnosisFirestoreDoc> rows) {
     if (rows.isEmpty) return null;
     final now = DateTime.now();
@@ -300,6 +338,7 @@ class FarmFirestoreTelemetryDatasource {
     var diseases = 0;
     var healthy = 0;
     DateTime? lastScan;
+  /// دالة for.
     for (final r in rows) {
       final t = r.createdAt;
       if (t == null || t.isBefore(start)) continue;
@@ -328,6 +367,7 @@ class FarmFirestoreTelemetryDatasource {
     );
   }
 
+  /// دالة داخلية: derive تنبيهات.
   List<DashboardAlert> _deriveAlerts({
     required RobotFirestoreDoc robot,
     required SensorReadingFirestoreDoc? sensor,
@@ -336,6 +376,7 @@ class FarmFirestoreTelemetryDatasource {
     final now = DateTime.now();
     if (robot.exists && robot.battery != null && robot.battery! < 18) {
       alerts.add(
+      /// دالة لوحة التحكم تنبيه.
         DashboardAlert(
           title: 'بطارية منخفضة',
           message:
@@ -348,6 +389,7 @@ class FarmFirestoreTelemetryDatasource {
     final water = robot.waterLevel ?? sensor?.waterLevel;
     if (water != null && water < 22) {
       alerts.add(
+      /// دالة لوحة التحكم تنبيه.
         DashboardAlert(
           title: 'انخفاض مستوى الماء',
           message:
@@ -359,6 +401,7 @@ class FarmFirestoreTelemetryDatasource {
     }
     if (!robot.exists) {
       alerts.add(
+      /// دالة لوحة التحكم تنبيه.
         DashboardAlert(
           title: 'لا توجد بيانات روبوت',
           message: 'أنشئ مستند robots/$_robotId في Firestore للبدء.',
@@ -370,6 +413,7 @@ class FarmFirestoreTelemetryDatasource {
     return alerts;
   }
 
+  /// دالة داخلية: build المستشعرات لقطة.
   SensorsSnapshot _buildSensorsSnapshot({
     required DocumentSnapshot<Map<String, dynamic>>? robotSnap,
     required QuerySnapshot<Map<String, dynamic>>? sensorSnap,
@@ -424,7 +468,9 @@ class FarmFirestoreTelemetryDatasource {
     );
   }
 
+  /// دالة داخلية: parse الروبوت الحالة.
   static RobotStatus _parseRobotStatus(String? raw) {
+  /// دالة switch.
     switch ((raw ?? '').trim().toLowerCase()) {
       case 'online':
       case 'متصل':
@@ -437,7 +483,9 @@ class FarmFirestoreTelemetryDatasource {
     }
   }
 
+  /// دالة داخلية: parse الروبوت وضع.
   static RobotMode _parseRobotMode(String? raw) {
+  /// دالة switch.
     switch ((raw ?? '').trim().toLowerCase()) {
       case 'moving':
       case 'move':
@@ -454,6 +502,7 @@ class FarmFirestoreTelemetryDatasource {
     }
   }
 
+  /// دالة داخلية: parse مضخة.
   static bool? _parsePump(dynamic v) {
     if (v == null) return null;
     if (v is bool) return v;
@@ -464,6 +513,7 @@ class FarmFirestoreTelemetryDatasource {
     return null;
   }
 
+  /// دالة داخلية: infer healthy.
   static bool _inferHealthy(String resultLoweredOrAny) {
     final s = resultLoweredOrAny.toLowerCase();
     return s.contains('healthy') ||

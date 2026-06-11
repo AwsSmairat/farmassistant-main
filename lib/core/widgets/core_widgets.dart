@@ -1,3 +1,14 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: core_widgets.dart
+// المسار: core/widgets/core_widgets.dart
+// الطبقة: core / widgets — مكوّنات مشتركة
+//
+// ماذا يفعل؟
+//   عنصر واجهة قابل لإعادة الاستخدام.
+//
+// ماذا بداخله؟
+//   • core_widgets
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 /// Core reusable widgets. Export all from here for convenience.
 library;
 

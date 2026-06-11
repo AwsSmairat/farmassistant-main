@@ -1,3 +1,15 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: profile_local_avatar_store.dart
+// المسار: core/storage/profile_local_avatar_store.dart
+// الطبقة: core / storage — التخزين المحلي
+//
+// ماذا يفعل؟
+//   جزء من البنية الأساسية للتطبيق.
+//
+// ماذا بداخله؟
+//   • profile_local_avatar_store
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'dart:typed_data';
 
 import 'profile_local_avatar_store_stub.dart'
@@ -9,8 +21,10 @@ import 'profile_local_avatar_store_stub.dart'
 abstract final class ProfileLocalAvatarStore {
   ProfileLocalAvatarStore._();
 
+  /// دالة load if exists.
   static Future<Uint8List?> loadIfExists(String uid) => avatar_store_impl.loadAvatarBytes(uid);
 
+  /// دالة persist pick.
   static Future<Uint8List?> persistPick(
     String uid, {
     String? path,

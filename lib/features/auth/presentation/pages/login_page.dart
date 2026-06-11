@@ -1,3 +1,17 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: login_page.dart
+// المسار: features/auth/presentation/pages/login_page.dart
+// الطبقة: presentation / pages — شاشة
+//
+// ماذا يفعل؟
+//   جزء من ميزة: المصادقة وتسجيل الدخول. شاشة واجهة المستخدم.
+//
+// ماذا بداخله؟
+//   • LoginPage
+//   • _LoginView
+//   • _LoginViewState
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -8,22 +22,29 @@ import '../../../../core/widgets/core_widgets.dart';
 import '../cubit/login_cubit.dart';
 import '../widgets/google_profile_completion_dialog.dart';
 
+/// شاشة تسجيل الدخول.
 class LoginPage extends StatelessWidget {
+  /// دالة تسجيل الدخول صفحة.
   const LoginPage({super.key});
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return const _LoginView();
   }
 }
 
+/// مكوّن واجهة: تسجيل الدخول عرض.
 class _LoginView extends StatefulWidget {
+  /// دالة داخلية: تسجيل الدخول عرض.
   const _LoginView();
 
   @override
+  /// ينشئ الحالة.
   State<_LoginView> createState() => _LoginViewState();
 }
 
+/// حالة واجهة تسجيل الدخول عرض.
 class _LoginViewState extends State<_LoginView> {
   final _formKey = GlobalKey<FormState>();
   final _identifierController = TextEditingController();
@@ -31,12 +52,14 @@ class _LoginViewState extends State<_LoginView> {
   bool _rememberSession = false;
 
   @override
+  /// ينظف الموارد.
   void dispose() {
     _identifierController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
+  /// دالة داخلية: submit.
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     context.read<LoginCubit>().signInWithIdentifier(
@@ -46,6 +69,7 @@ class _LoginViewState extends State<_LoginView> {
   }
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -56,6 +80,7 @@ class _LoginViewState extends State<_LoginView> {
           listener: (context, state) {
             if (state.status == LoginStatus.failure) {
               ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+              /// دالة snack شريط.
                 SnackBar(
                   content: Text(state.message ?? 'حدث خطأ'),
                   backgroundColor: AppColors.error,
@@ -68,6 +93,7 @@ class _LoginViewState extends State<_LoginView> {
                 googleUser != null) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!context.mounted) return;
+              /// دالة show جوجل الملف الشخصي إكمال حوار.
                 showGoogleProfileCompletionDialog(
                   context,
                   onSubmit: ({
@@ -98,6 +124,7 @@ class _LoginViewState extends State<_LoginView> {
           },
           builder: (context, state) {
             final isLoading = state.status == LoginStatus.loading;
+            /// دالة single child scroll عرض.
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Form(
@@ -105,7 +132,9 @@ class _LoginViewState extends State<_LoginView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    /// دالة sized box.
                     const SizedBox(height: 32),
+                    /// دالة التطبيق رأس.
                     const AppHeader(
                       logo: CircleAvatar(
                         radius: 36,
@@ -116,14 +145,18 @@ class _LoginViewState extends State<_LoginView> {
                       titleAccent: 'FarmAssistant',
                       subtitle: 'بوابة آمنة لإدارة المزرعة',
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 32),
+                  /// دالة زجاجي زجاج لوحة.
                     LiquidGlassPanel(
                       borderRadius: LiquidGlassTokens.radiusSm,
                       blurSigma: LiquidGlassTokens.blurMedium,
                       padding: const EdgeInsets.all(16),
                       child: const AppStatusIndicator(label: 'SYSTEM ONLINE'),
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 28),
+                  /// دالة التطبيق نص حقل.
                     AppTextField(
                       controller: _identifierController,
                       label: 'البريد الإلكتروني أو اسم المستخدم',
@@ -139,7 +172,9 @@ class _LoginViewState extends State<_LoginView> {
                       },
                       autofillHints: const [AutofillHints.email],
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 16),
+                  /// دالة التطبيق نص حقل.
                     AppTextField(
                       controller: _passwordController,
                       label: 'كلمة المرور',
@@ -154,31 +189,39 @@ class _LoginViewState extends State<_LoginView> {
                       },
                       autofillHints: const [AutofillHints.password],
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 12),
+                  /// دالة صف.
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                      /// دالة صف.
                         Row(
                           children: [
+                          /// دالة checkbox.
                             Checkbox(
                               value: _rememberSession,
                               onChanged: (v) => setState(() => _rememberSession = v ?? false),
                               activeColor: AppColors.primary,
                               fillColor: WidgetStateProperty.resolveWith((_) => AppColors.surface),
                             ),
+                          /// دالة نص.
                             Text(
                               'تذكر الجلسة',
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ],
                         ),
+                      /// دالة التطبيق نص رابط.
                         AppTextLink(
                           label: 'نسيت كلمة المرور؟',
                           onPressed: () => context.push('/forgot-password'),
                         ),
                       ],
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 24),
+                  /// دالة التطبيق رئيسي زر.
                     AppPrimaryButton(
                       label: 'تسجيل الدخول',
                       trailingIcon: true,
@@ -186,7 +229,9 @@ class _LoginViewState extends State<_LoginView> {
                       onPressed: _submit,
                       isLoading: isLoading,
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 24),
+                  /// دالة نص.
                     Text(
                       'SECURE PROTOCOLS',
                       textAlign: TextAlign.center,
@@ -195,22 +240,28 @@ class _LoginViewState extends State<_LoginView> {
                             letterSpacing: 1,
                           ),
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 12),
+                  /// دالة التطبيق ثانوي زر.
                     AppSecondaryButton(
                       label: 'Google',
                       icon: Icons.g_mobiledata_rounded,
                       onPressed: isLoading ? null : () => context.read<LoginCubit>().signInWithGoogle(),
                     ),
+                  /// دالة صف.
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                      /// دالة نص.
                         Text('ليس لديك حساب؟ ', style: Theme.of(context).textTheme.bodyMedium),
+                      /// دالة التطبيق نص رابط.
                         AppTextLink(
                           label: 'إنشاء حساب',
                           onPressed: () => context.push('/signup'),
                         ),
                       ],
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 32),
                   ],
                 ),

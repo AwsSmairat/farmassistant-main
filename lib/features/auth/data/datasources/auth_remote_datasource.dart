@@ -1,3 +1,15 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: auth_remote_datasource.dart
+// المسار: features/auth/data/datasources/auth_remote_datasource.dart
+// الطبقة: data / datasources — مصدر بيانات
+//
+// ماذا يفعل؟
+//   جزء من ميزة: المصادقة وتسجيل الدخول. الاتصال بـ Firebase أو API.
+//
+// ماذا بداخله؟
+//   • AuthRemoteDatasource
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
@@ -11,7 +23,7 @@ import '../../domain/entities/auth_user.dart';
 /// Remote auth operations. All Firebase/Google logic stays here.
 ///
 /// **Web:** Google uses [FirebaseAuth.signInWithPopup] (no `google_sign_in_web` ClientID).
-/// **Mobile/desktop (IO):** Uses [GoogleSignIn] + credential exchange.
+/// مصدر بيانات المصادقة بعيد مصدر بيانات.
 class AuthRemoteDatasource {
   AuthRemoteDatasource({
     firebase_auth.FirebaseAuth? firebaseAuth,
@@ -21,16 +33,21 @@ class AuthRemoteDatasource {
 
   final firebase_auth.FirebaseAuth _firebaseAuth;
   /// Null on web — avoids `google_sign_in_web` requiring OAuth Client ID in HTML.
+  /// حقل: جوجل تسجيل in.
   final GoogleSignIn? _googleSignIn;
 
+  /// يُرجع المصادقة الحالة changes.
   Stream<AuthUser?> get authStateChanges =>
       _firebaseAuth.authStateChanges().map(_userOrNull);
 
+  /// يُرجع current المستخدم.
   AuthUser? get currentUser => _userOrNull(_firebaseAuth.currentUser);
 
+  /// دالة داخلية: المستخدم or null.
   AuthUser? _userOrNull(firebase_auth.User? u) =>
       u == null ? null : AuthUserModel.fromFirebaseUser(u);
 
+  /// يسجّل دخول with البريد and كلمة المرور.
   Future<AuthUser> signInWithEmailAndPassword({
     required String email,
     required String password,
@@ -48,6 +65,7 @@ class AuthRemoteDatasource {
     }
   }
 
+  /// ينشئ المستخدم with البريد and كلمة المرور.
   Future<AuthUser> createUserWithEmailAndPassword({
     required String email,
     required String password,
@@ -65,6 +83,7 @@ class AuthRemoteDatasource {
     }
   }
 
+  /// يرسل البريد verification.
   Future<void> sendEmailVerification() async {
     final user = _firebaseAuth.currentUser;
     if (user != null && !user.emailVerified) {
@@ -72,11 +91,13 @@ class AuthRemoteDatasource {
     }
   }
 
+  /// يحذف current المستخدم.
   Future<void> deleteCurrentUser() async {
     final user = _firebaseAuth.currentUser;
     if (user != null) await user.delete();
   }
 
+  /// يرسل كلمة المرور إعادة تعيين البريد.
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _firebaseAuth.sendPasswordResetEmail(email: email);
@@ -85,6 +106,7 @@ class AuthRemoteDatasource {
     }
   }
 
+  /// يسجّل دخول with جوجل.
   Future<AuthUser> signInWithGoogle() async {
     if (kIsWeb) {
       return _signInWithGoogleWeb();
@@ -101,6 +123,7 @@ class AuthRemoteDatasource {
   }
 
   /// Call once at startup on web after returning from [signInWithRedirect] (e.g. Safari).
+  /// دالة complete redirect تسجيل in if needed.
   Future<void> completeRedirectSignInIfNeeded() async {
     if (!kIsWeb) return;
     try {
@@ -108,6 +131,7 @@ class AuthRemoteDatasource {
     } catch (_) {}
   }
 
+  /// دالة داخلية: تسجيل in with جوجل ويب.
   Future<AuthUser> _signInWithGoogleWeb() async {
     try {
       final provider = _googleAuthProviderWeb();
@@ -121,6 +145,7 @@ class AuthRemoteDatasource {
           code == 'popup-blocked' ||
           code == 'cancelled-popup-request') {
         await _firebaseAuth.signInWithRedirect(_googleAuthProviderWeb());
+        /// دالة جوجل redirect pending استثناء.
         throw const GoogleRedirectPendingException();
       }
       throw Exception(_authErrorMessage(e));
@@ -131,6 +156,7 @@ class AuthRemoteDatasource {
     }
   }
 
+  /// دالة داخلية: تسجيل in with جوجل mobile.
   Future<AuthUser> _signInWithGoogleMobile() async {
     final googleSignIn = _googleSignIn;
     if (googleSignIn == null) {
@@ -142,6 +168,7 @@ class AuthRemoteDatasource {
       final googleAuth = await googleUser.authentication;
       final idToken = googleAuth.idToken;
       if (idToken == null) {
+        /// دالة استثناء.
         throw Exception(
           'فشل الحصول على رمز تعريف من Google. تأكد من إعداد تسجيل الدخول في Firebase.',
         );
@@ -162,6 +189,7 @@ class AuthRemoteDatasource {
     }
   }
 
+  /// يسجّل خروج.
   Future<void> signOut() async {
     final googleSignIn = _googleSignIn;
     final hadSession = _firebaseAuth.currentUser != null;
@@ -200,7 +228,9 @@ class AuthRemoteDatasource {
   }
 
   /// Maps Firebase auth error codes to user-friendly Arabic messages.
+  /// دالة داخلية: المصادقة خطأ message.
   static String _authErrorMessage(firebase_auth.FirebaseAuthException e) {
+  /// دالة switch.
     switch (e.code) {
       case 'popup-closed-by-user':
       case 'cancelled-popup-request':

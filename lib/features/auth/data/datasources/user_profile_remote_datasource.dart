@@ -1,3 +1,15 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: user_profile_remote_datasource.dart
+// المسار: features/auth/data/datasources/user_profile_remote_datasource.dart
+// الطبقة: data / datasources — مصدر بيانات
+//
+// ماذا يفعل؟
+//   جزء من ميزة: المصادقة وتسجيل الدخول. الاتصال بـ Firebase أو API.
+//
+// ماذا بداخله؟
+//   • UserProfileRemoteDatasource
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/error/app_exceptions.dart';
@@ -5,23 +17,30 @@ import '../../domain/entities/user_profile_data.dart';
 
 /// Firestore operations for user profiles (username, phone uniqueness).
 /// Uses index collections (username_index, phone_index) with doc ID = value
-/// so Transaction.get(DocumentReference) can enforce uniqueness.
+/// مصدر بيانات المستخدم الملف الشخصي بعيد مصدر بيانات.
 class UserProfileRemoteDatasource {
   UserProfileRemoteDatasource({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
+  /// حقل: collection name.
   static const String _collectionName = 'user_profiles';
+  /// حقل: username index name.
   static const String _usernameIndexName = 'username_index';
+  /// حقل: phone index name.
   static const String _phoneIndexName = 'phone_index';
 
+  /// حقل: Firestore.
   final FirebaseFirestore _firestore;
 
+  /// دالة داخلية: normalize username.
   static String _normalizeUsername(String username) =>
       username.trim().toLowerCase();
 
+  /// دالة داخلية: normalize phone.
   static String _normalizePhone(String phone) =>
       phone.trim().replaceAll(RegExp(r'\s'), '');
 
+  /// دالة is username taken.
   Future<bool> isUsernameTaken(String username) async {
     try {
       final lower = _normalizeUsername(username);
@@ -34,6 +53,7 @@ class UserProfileRemoteDatasource {
     }
   }
 
+  /// دالة is phone taken.
   Future<bool> isPhoneTaken(String phone) async {
     try {
       final normalized = _normalizePhone(phone);
@@ -46,6 +66,7 @@ class UserProfileRemoteDatasource {
     }
   }
 
+  /// يجلب البريد by username.
   Future<String?> getEmailByUsername(String username) async {
     try {
       final lower = _normalizeUsername(username);
@@ -64,6 +85,7 @@ class UserProfileRemoteDatasource {
     }
   }
 
+  /// يجلب البريد by phone.
   Future<String?> getEmailByPhone(String phone) async {
     try {
       final normalized = _normalizePhone(phone);
@@ -80,6 +102,7 @@ class UserProfileRemoteDatasource {
     }
   }
 
+  /// دالة has الملف الشخصي.
   Future<bool> hasProfile(String uid) async {
     try {
       final doc = await _firestore.collection(_collectionName).doc(uid).get();
@@ -90,6 +113,7 @@ class UserProfileRemoteDatasource {
     }
   }
 
+  /// يجلب username by uid.
   Future<String?> getUsernameByUid(String uid) async {
     try {
       final doc = await _firestore.collection(_collectionName).doc(uid).get();
@@ -102,6 +126,7 @@ class UserProfileRemoteDatasource {
     }
   }
 
+  /// يجلب الملف الشخصي by uid.
   Future<UserProfileData?> getProfileByUid(String uid) async {
     try {
       final doc = await _firestore.collection(_collectionName).doc(uid).get();
@@ -117,6 +142,7 @@ class UserProfileRemoteDatasource {
     }
   }
 
+  /// ينشئ الملف الشخصي.
   Future<void> createProfile({
     required String uid,
     required String username,
@@ -136,10 +162,12 @@ class UserProfileRemoteDatasource {
 
       final usernameSnap = await tx.get(usernameRef);
       if (usernameSnap.exists) {
+        /// دالة استثناء.
         throw Exception('اسم المستخدم مستخدم بالفعل');
       }
       final phoneSnap = await tx.get(phoneRef);
       if (phoneSnap.exists) {
+        /// دالة استثناء.
         throw Exception('رقم الهاتف مستخدم بالفعل');
       }
 
@@ -160,6 +188,7 @@ class UserProfileRemoteDatasource {
     }
   }
 
+  /// يحدّث الملف الشخصي.
   Future<void> updateProfile({
     required String uid,
     String? username,
@@ -178,9 +207,11 @@ class UserProfileRemoteDatasource {
       final newPhoneNormalized = phone != null ? _normalizePhone(phone) : null;
 
       if (newUsernameLower != null && newUsernameLower.isEmpty) {
+        /// دالة استثناء.
         throw Exception('اسم المستخدم غير صالح');
       }
       if (newPhoneNormalized != null && newPhoneNormalized.isEmpty) {
+        /// دالة استثناء.
         throw Exception('رقم الهاتف غير صالح');
       }
 
@@ -191,6 +222,7 @@ class UserProfileRemoteDatasource {
         final key = newUsernameLower;
         final existing = await _firestore.collection(_usernameIndexName).doc(key).get();
         if (existing.exists && ((existing.data()?['uid'] as String?) != uid)) {
+          /// دالة استثناء.
           throw Exception('اسم المستخدم مستخدم بالفعل');
         }
       }
@@ -198,6 +230,7 @@ class UserProfileRemoteDatasource {
         final key = newPhoneNormalized;
         final existing = await _firestore.collection(_phoneIndexName).doc(key).get();
         if (existing.exists && ((existing.data()?['uid'] as String?) != uid)) {
+          /// دالة استثناء.
           throw Exception('رقم الهاتف مستخدم بالفعل');
         }
       }

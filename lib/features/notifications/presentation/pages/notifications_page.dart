@@ -1,3 +1,21 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: notifications_page.dart
+// المسار: features/notifications/presentation/pages/notifications_page.dart
+// الطبقة: presentation / pages — شاشة
+//
+// ماذا يفعل؟
+//   جزء من ميزة: التنبيهات. شاشة واجهة المستخدم.
+//
+// ماذا بداخله؟
+//   • NotificationsPage
+//   • _NotificationsView
+//   • _NotificationItem
+//   • _NotifVisual
+//   • _tabForCategory()
+//   • _categoryLabel()
+//   • _timeLabel()
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -9,10 +27,13 @@ import '../../domain/entities/farm_notification.dart';
 import '../cubit/notifications_cubit.dart';
 import '../cubit/notifications_state.dart';
 
+/// شاشة التنبيهات.
 class NotificationsPage extends StatelessWidget {
+  /// دالة التنبيهات صفحة.
   const NotificationsPage({super.key});
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<NotificationsCubit>()..start(),
@@ -21,16 +42,20 @@ class NotificationsPage extends StatelessWidget {
   }
 }
 
+/// مكوّن واجهة: التنبيهات عرض.
 class _NotificationsView extends StatelessWidget {
+  /// دالة داخلية: التنبيهات عرض.
   const _NotificationsView();
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: LiquidGlassAppBar(
         title: const Text('Notifications'),
         actions: [
+        /// دالة نص زر.
           TextButton(
             onPressed: () => context.read<NotificationsCubit>().clearAll(),
             child: const Text(
@@ -44,11 +69,13 @@ class _NotificationsView extends StatelessWidget {
         child: BlocBuilder<NotificationsCubit, NotificationsState>(
           builder: (context, state) {
             if (state is NotificationsLoading || state is NotificationsInitial) {
+              /// دالة center.
               return const Center(
                 child: CircularProgressIndicator(color: AppColors.primary),
               );
             }
             if (state is NotificationsFailure) {
+              /// دالة center.
               return Center(
                 child: Text(
                   state.message,
@@ -60,6 +87,7 @@ class _NotificationsView extends StatelessWidget {
               return const SizedBox.shrink();
             }
             if (state.items.isEmpty) {
+              /// دالة center.
               return const Center(
                 child: Text(
                   'لا توجد إشعارات حالياً',
@@ -77,6 +105,7 @@ class _NotificationsView extends StatelessWidget {
               separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
                 final item = state.items[index];
+                /// دالة داخلية: التنبيه item.
                 return _NotificationItem(item: item);
               },
             );
@@ -87,12 +116,16 @@ class _NotificationsView extends StatelessWidget {
   }
 }
 
+/// كلاس التنبيه item.
 class _NotificationItem extends StatelessWidget {
+  /// دالة داخلية: التنبيه item.
   const _NotificationItem({required this.item});
 
+  /// حقل: item.
   final FarmNotification item;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     final visual = _visuals(item.severity);
     return Dismissible(
@@ -123,6 +156,7 @@ class _NotificationItem extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+            /// دالة container.
               Container(
                 padding: const EdgeInsets.all(9),
                 decoration: BoxDecoration(
@@ -131,13 +165,17 @@ class _NotificationItem extends StatelessWidget {
                 ),
                 child: Icon(visual.icon, color: visual.color, size: 20),
               ),
+              /// دالة sized box.
               const SizedBox(width: 10),
+            /// دالة expanded.
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                  /// دالة صف.
                     Row(
                       children: [
+                      /// دالة expanded.
                         Expanded(
                           child: Text(
                             item.title,
@@ -149,6 +187,7 @@ class _NotificationItem extends StatelessWidget {
                           ),
                         ),
                         if (!item.isRead)
+                        /// دالة container.
                           Container(
                             width: 8,
                             height: 8,
@@ -159,7 +198,9 @@ class _NotificationItem extends StatelessWidget {
                           ),
                       ],
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 4),
+                  /// دالة نص.
                     Text(
                       item.description,
                       style: const TextStyle(
@@ -168,10 +209,14 @@ class _NotificationItem extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
+                    /// دالة sized box.
                     const SizedBox(height: 6),
+                  /// دالة صف.
                     Row(
                       children: [
+                      /// دالة نص.
                         Text(
+                        /// دالة داخلية: category label.
                           _categoryLabel(item.category),
                           style: TextStyle(
                             color: visual.color,
@@ -179,8 +224,11 @@ class _NotificationItem extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
+                        /// دالة spacer.
                         const Spacer(),
+                      /// دالة نص.
                         Text(
+                        /// دالة داخلية: time label.
                           _timeLabel(item.timestamp),
                           style: const TextStyle(
                             color: AppColors.textMuted,
@@ -201,6 +249,7 @@ class _NotificationItem extends StatelessWidget {
   }
 }
 
+/// دالة داخلية: tab for category.
 String _tabForCategory(NotificationCategory category) {
   switch (category) {
     case NotificationCategory.sensorAlert:
@@ -225,6 +274,7 @@ _NotifVisual _visuals(NotificationSeverity severity) {
   }
 }
 
+/// دالة داخلية: category label.
 String _categoryLabel(NotificationCategory category) {
   switch (category) {
     case NotificationCategory.sensorAlert:
@@ -238,6 +288,7 @@ String _categoryLabel(NotificationCategory category) {
   }
 }
 
+/// دالة داخلية: time label.
 String _timeLabel(DateTime timestamp) {
   final now = DateTime.now();
   final diff = now.difference(timestamp);
@@ -247,9 +298,13 @@ String _timeLabel(DateTime timestamp) {
   return 'قبل ${diff.inDays} ي';
 }
 
+/// كلاس notif visual.
 class _NotifVisual {
+  /// دالة داخلية: notif visual.
   const _NotifVisual(this.color, this.icon);
 
+  /// حقل: color.
   final Color color;
+  /// حقل: أيقونة.
   final IconData icon;
 }

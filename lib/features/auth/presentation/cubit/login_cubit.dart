@@ -1,3 +1,15 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: login_cubit.dart
+// المسار: features/auth/presentation/cubit/login_cubit.dart
+// الطبقة: presentation / cubit — منطق الواجهة
+//
+// ماذا يفعل؟
+//   جزء من ميزة: المصادقة وتسجيل الدخول. إدارة الحالة والأحداث (Bloc/Cubit).
+//
+// ماذا بداخله؟
+//   • LoginCubit
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
@@ -10,6 +22,7 @@ import '../../domain/usecases/sign_out.dart';
 
 part 'login_state.dart';
 
+/// منطق الواجهة (Cubit) لـ تسجيل الدخول.
 class LoginCubit extends Cubit<LoginState> {
   LoginCubit({
     required SignInWithIdentifier signInWithIdentifier,
@@ -20,17 +33,24 @@ class LoginCubit extends Cubit<LoginState> {
         _signInWithGoogle = signInWithGoogle,
         _userProfileRepository = userProfileRepository,
         _signOut = signOut,
+      /// دالة super.
         super(const LoginState.initial());
 
+  /// حقل: تسجيل in with معرّف.
   final SignInWithIdentifier _signInWithIdentifier;
+  /// حقل: تسجيل in with جوجل.
   final SignInWithGoogle _signInWithGoogle;
+  /// حقل: المستخدم الملف الشخصي مستودع.
   final UserProfileRepository _userProfileRepository;
+  /// حقل: تسجيل خروج.
   final SignOut _signOut;
 
+  /// يسجّل دخول with معرّف.
   Future<void> signInWithIdentifier({
     required String identifier,
     required String password,
   }) async {
+  /// يصدّر حالة جديدة.
     emit(const LoginState.loading());
     try {
       final user = await _signInWithIdentifier(
@@ -45,7 +65,9 @@ class LoginCubit extends Cubit<LoginState> {
     }
   }
 
+  /// يسجّل دخول with جوجل.
   Future<void> signInWithGoogle() async {
+  /// يصدّر حالة جديدة.
     emit(const LoginState.loading());
     try {
       final user = await _signInWithGoogle();
@@ -65,13 +87,16 @@ class LoginCubit extends Cubit<LoginState> {
   }
 
   /// Call after user fills the Google profile dialog (username, phone, password).
+  /// دالة complete جوجل الملف الشخصي.
   Future<void> completeGoogleProfile({
     required AuthUser user,
     required String username,
     required String phone,
     required String password,
   }) async {
+  /// دالة assert.
     assert(password.isNotEmpty);
+  /// يصدّر حالة جديدة.
     emit(const LoginState.loading());
     try {
       final email = user.email ?? '';
@@ -102,10 +127,13 @@ class LoginCubit extends Cubit<LoginState> {
   }
 
   /// Cancel Google profile dialog: sign out and reset.
+  /// دالة cancel جوجل الملف الشخصي.
   Future<void> cancelGoogleProfile() async {
     await _signOut();
+  /// يصدّر حالة جديدة.
     emit(const LoginState.initial());
   }
 
+  /// دالة إعادة تعيين.
   void reset() => emit(const LoginState.initial());
 }

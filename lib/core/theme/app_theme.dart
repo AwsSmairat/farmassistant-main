@@ -1,3 +1,15 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: app_theme.dart
+// المسار: core/theme/app_theme.dart
+// الطبقة: core / theme — الألوان والثيم
+//
+// ماذا يفعل؟
+//   ألوان وخطوط التطبيق.
+//
+// ماذا بداخله؟
+//   • app_theme
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
@@ -5,6 +17,7 @@ import 'app_colors.dart';
 abstract final class AppTheme {
   AppTheme._();
 
+  /// يُرجع dark.
   static ThemeData get dark => ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
@@ -110,6 +123,7 @@ abstract final class AppTheme {
         textTheme: _textTheme,
       );
 
+  /// يُرجع نص الثيم.
   static TextTheme get _textTheme => TextTheme(
         displayLarge: const TextStyle(
           color: AppColors.textPrimary,

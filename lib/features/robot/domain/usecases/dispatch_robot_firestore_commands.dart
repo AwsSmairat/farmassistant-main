@@ -19,6 +19,7 @@ import '../../data/services/robot_command_service.dart';
 class DispatchRobotFirestoreCommands {
   DispatchRobotFirestoreCommands(this._commands);
 
+  /// حقل: أوامر.
   final RobotCommandService _commands;
 
   /// إرسال أمر حركة: forward | backward | left | right | stop.
@@ -34,8 +35,10 @@ class DispatchRobotFirestoreCommands {
   Future<void> requestGpsRefresh() => _commands.requestGpsRefresh();
 
   @Deprecated('استخدم sendMove للتحكم بالاتجاه')
+  /// يرسل servo.
   Future<void> sendServo(String direction) => sendMove(direction);
 
   @Deprecated('استخدم sendAutoMode بدلاً منه')
+  /// يطلب scan.
   Future<void> requestScan() => sendAutoMode(true);
 }

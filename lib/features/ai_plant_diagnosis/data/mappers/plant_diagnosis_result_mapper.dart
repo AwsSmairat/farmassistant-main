@@ -1,10 +1,22 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: plant_diagnosis_result_mapper.dart
+// المسار: features/ai_plant_diagnosis/data/mappers/plant_diagnosis_result_mapper.dart
+// الطبقة: data / mappers — تحويل البيانات
+//
+// ماذا يفعل؟
+//   جزء من ميزة: تشخيص النبات بالذكاء الاصطناعي. تحويل بين نماذج البيانات.
+//
+// ماذا بداخله؟
+//   • PlantDiagnosisResultMapper
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import '../../domain/entities/plant_diagnosis_result.dart';
 import '../../domain/failures/plant_diagnosis_failure.dart';
-
-/// Maps Cloud Function JSON payload into a [PlantDiagnosisResult].
+/// محوّل بيانات النبات التشخيص نتيجة.
 class PlantDiagnosisResultMapper {
   PlantDiagnosisResultMapper._();
 
+  /// دالة from استدعاء map.
   static PlantDiagnosisResult fromCallableMap(Map<String, dynamic> raw) {
     final resultStr = (raw['result'] ?? '').toString().trim();
     final diseaseName = (raw['diseaseName'] ?? '').toString().trim();

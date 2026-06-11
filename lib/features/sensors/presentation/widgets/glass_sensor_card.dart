@@ -1,22 +1,38 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: glass_sensor_card.dart
+// المسار: features/sensors/presentation/widgets/glass_sensor_card.dart
+// الطبقة: presentation / widgets — مكوّن واجهة
+//
+// ماذا يفعل؟
+//   جزء من ميزة: المستشعرات. عنصر واجهة قابل لإعادة الاستخدام.
+//
+// ماذا بداخله؟
+//   • GlassSensorCard
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../../domain/entities/sensor_health.dart';
 import '../mappers/sensors_ui_mapper.dart';
-
-/// Sensor tile with shared liquid-glass panel; status tint only on the border.
+/// مكوّن واجهة: زجاج المستشعر بطاقة.
 class GlassSensorCard extends StatelessWidget {
+  /// دالة زجاج المستشعر بطاقة.
   const GlassSensorCard({
     super.key,
     required this.tile,
     this.footer,
   });
 
+  /// حقل: tile.
   final SensorTileVm tile;
+  /// حقل: footer.
   final Widget? footer;
 
+  /// دالة داخلية: accent.
   static Color _accent(SensorHealth h) {
+  /// دالة switch.
     switch (h) {
       case SensorHealth.good:
         return AppColors.success;
@@ -28,6 +44,7 @@ class GlassSensorCard extends StatelessWidget {
   }
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     final accent = _accent(tile.health);
     return Material(
@@ -41,8 +58,10 @@ class GlassSensorCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+          /// دالة صف.
             Row(
               children: [
+              /// دالة container.
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -51,7 +70,9 @@ class GlassSensorCard extends StatelessWidget {
                   ),
                   child: Icon(tile.icon, color: accent, size: 22),
                 ),
+                /// دالة spacer.
                 const Spacer(),
+              /// دالة container.
                 Container(
                   width: 8,
                   height: 8,
@@ -59,6 +80,7 @@ class GlassSensorCard extends StatelessWidget {
                     color: accent,
                     shape: BoxShape.circle,
                     boxShadow: [
+                    /// دالة box shadow.
                       BoxShadow(
                         color: accent.withValues(alpha: 0.45),
                         blurRadius: 6,
@@ -68,7 +90,9 @@ class GlassSensorCard extends StatelessWidget {
                 ),
               ],
             ),
+            /// دالة sized box.
             const SizedBox(height: 12),
+          /// دالة نص.
             Text(
               tile.title,
               style: const TextStyle(
@@ -77,7 +101,9 @@ class GlassSensorCard extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
+            /// دالة sized box.
             const SizedBox(height: 6),
+          /// دالة نص.
             Text(
               tile.value,
               style: const TextStyle(
@@ -87,7 +113,9 @@ class GlassSensorCard extends StatelessWidget {
               ),
             ),
             if (tile.hint != null) ...[
+              /// دالة sized box.
               const SizedBox(height: 8),
+            /// دالة نص.
               Text(
                 tile.hint!,
                 style: TextStyle(
@@ -98,6 +126,7 @@ class GlassSensorCard extends StatelessWidget {
               ),
             ],
             if (footer != null) ...[
+              /// دالة sized box.
               const SizedBox(height: 10),
               footer!,
             ],

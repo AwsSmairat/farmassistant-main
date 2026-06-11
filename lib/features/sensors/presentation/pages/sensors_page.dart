@@ -1,3 +1,20 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: sensors_page.dart
+// المسار: features/sensors/presentation/pages/sensors_page.dart
+// الطبقة: presentation / pages — شاشة
+//
+// ماذا يفعل؟
+//   جزء من ميزة: المستشعرات. شاشة واجهة المستخدم.
+//
+// ماذا بداخله؟
+//   • SensorsPage
+//   • _SensorsView
+//   • _SoilMoistureCheckButton
+//   • _SensorsHeader
+//   • _RobotStatusBadge
+//   • _BottomInfoBar
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -10,12 +27,13 @@ import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../cubit/sensors_cubit.dart';
 import '../cubit/sensors_state.dart';
 import '../widgets/glass_sensor_card.dart';
-
-/// Sensors dashboard: real-time grid of farm / robot readings.
+/// شاشة المستشعرات.
 class SensorsPage extends StatelessWidget {
+  /// دالة المستشعرات صفحة.
   const SensorsPage({super.key});
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<SensorsCubit>()..start(),
@@ -24,10 +42,13 @@ class SensorsPage extends StatelessWidget {
   }
 }
 
+/// مكوّن واجهة: المستشعرات عرض.
 class _SensorsView extends StatelessWidget {
+  /// دالة داخلية: المستشعرات عرض.
   const _SensorsView();
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -35,11 +56,13 @@ class _SensorsView extends StatelessWidget {
         child: BlocBuilder<SensorsCubit, SensorsState>(
           builder: (context, state) {
             if (state is SensorsLoading || state is SensorsInitial) {
+              /// دالة center.
               return const Center(
                 child: CircularProgressIndicator(color: AppColors.primary),
               );
             }
             if (state is SensorsFailure) {
+              /// دالة center.
               return Center(
                 child: Text(
                   state.message,
@@ -59,14 +82,17 @@ class _SensorsView extends StatelessWidget {
               MediaQuery.sizeOf(context).width,
             );
 
+            /// دالة custom scroll عرض.
             return CustomScrollView(
               slivers: [
+              /// دالة sliver padding.
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                   sliver: SliverToBoxAdapter(
                     child: _SensorsHeader(robotOnline: snap.robotOnline),
                   ),
                 ),
+              /// دالة sliver padding.
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverGrid(
@@ -78,12 +104,14 @@ class _SensorsView extends StatelessWidget {
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
+                        /// دالة زجاج المستشعر بطاقة.
                         return GlassSensorCard(tile: state.tiles[index]);
                       },
                       childCount: state.tiles.length,
                     ),
                   ),
                 ),
+              /// دالة sliver to box adapter.
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
@@ -94,6 +122,7 @@ class _SensorsView extends StatelessWidget {
                     ),
                   ),
                 ),
+              /// دالة sliver to box adapter.
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
@@ -103,6 +132,7 @@ class _SensorsView extends StatelessWidget {
                     ),
                   ),
                 ),
+              /// دالة sliver to box adapter.
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
@@ -121,18 +151,24 @@ class _SensorsView extends StatelessWidget {
   }
 }
 
+/// مكوّن واجهة: soil رطوبة check زر.
 class _SoilMoistureCheckButton extends StatelessWidget {
+  /// دالة داخلية: soil رطوبة check زر.
   const _SoilMoistureCheckButton({
     required this.loading,
     required this.enabled,
     required this.onPressed,
   });
 
+  /// حقل: تحميل.
   final bool loading;
+  /// حقل: enabled.
   final bool enabled;
+  /// حقل: on pressed.
   final VoidCallback? onPressed;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
@@ -151,6 +187,7 @@ class _SoilMoistureCheckButton extends StatelessWidget {
           ),
         ),
         icon: loading
+            /// دالة sized box.
             ? const SizedBox(
                 width: 16,
                 height: 16,
@@ -176,20 +213,26 @@ class _SoilMoistureCheckButton extends StatelessWidget {
   }
 }
 
+/// كلاس المستشعرات رأس.
 class _SensorsHeader extends StatelessWidget {
+  /// دالة داخلية: المستشعرات رأس.
   const _SensorsHeader({required this.robotOnline});
 
+  /// حقل: الروبوت متصل.
   final bool robotOnline;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        /// دالة expanded.
         const Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+            /// دالة نص.
               Text(
                 'Sensors Dashboard',
                 style: TextStyle(
@@ -198,7 +241,9 @@ class _SensorsHeader extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+            /// دالة sized box.
               SizedBox(height: 4),
+            /// دالة نص.
               Text(
                 'لوحة المستشعرات',
                 style: TextStyle(
@@ -210,18 +255,23 @@ class _SensorsHeader extends StatelessWidget {
             ],
           ),
         ),
+      /// دالة داخلية: الروبوت الحالة badge.
         _RobotStatusBadge(online: robotOnline),
       ],
     );
   }
 }
 
+/// كلاس الروبوت الحالة badge.
 class _RobotStatusBadge extends StatelessWidget {
+  /// دالة داخلية: الروبوت الحالة badge.
   const _RobotStatusBadge({required this.online});
 
+  /// حقل: متصل.
   final bool online;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     final color = online ? AppColors.success : AppColors.error;
     final label = online ? 'متصل' : 'غير متصل';
@@ -235,12 +285,15 @@ class _RobotStatusBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+        /// دالة أيقونة.
           Icon(
             online ? Icons.circle : Icons.circle_outlined,
             size: 10,
             color: color,
           ),
+          /// دالة sized box.
           const SizedBox(width: 8),
+        /// دالة نص.
           Text(
             label,
             style: TextStyle(
@@ -255,16 +308,21 @@ class _RobotStatusBadge extends StatelessWidget {
   }
 }
 
+/// مكوّن واجهة: سفلي info شريط.
 class _BottomInfoBar extends StatelessWidget {
+  /// دالة داخلية: سفلي info شريط.
   const _BottomInfoBar({
     required this.updatedTime,
     required this.robotOnline,
   });
 
+  /// حقل: updated time.
   final String updatedTime;
+  /// حقل: الروبوت متصل.
   final bool robotOnline;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return LiquidGlassPanel(
       borderRadius: LiquidGlassTokens.radiusSm,
@@ -272,8 +330,11 @@ class _BottomInfoBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(
         children: [
+          /// دالة أيقونة.
           const Icon(Icons.update, color: AppColors.textSecondary, size: 18),
+          /// دالة sized box.
           const SizedBox(width: 8),
+        /// دالة expanded.
           Expanded(
             child: Text(
               'آخر تحديث: $updatedTime · ${robotOnline ? 'البث مباشر' : 'بدون اتصال'}',
@@ -290,16 +351,21 @@ class _BottomInfoBar extends StatelessWidget {
   }
 }
 
+/// كلاس الروبوت location map.
 class _RobotLocationMap extends StatelessWidget {
+  /// دالة داخلية: الروبوت location map.
   const _RobotLocationMap({
     required this.latitude,
     required this.longitude,
   });
 
+  /// حقل: latitude.
   final double latitude;
+  /// حقل: longitude.
   final double longitude;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     final position = LatLng(latitude, longitude);
     return LiquidGlassPanel(
@@ -308,12 +374,16 @@ class _RobotLocationMap extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          /// دالة padding.
           const Padding(
             padding: EdgeInsets.fromLTRB(12, 10, 12, 8),
             child: Row(
               children: [
+              /// دالة أيقونة.
                 Icon(Icons.map_outlined, color: AppColors.info, size: 18),
+              /// دالة sized box.
                 SizedBox(width: 8),
+              /// دالة نص.
                 Text(
                   'موقع الروبوت (GPS)',
                   style: TextStyle(
@@ -325,6 +395,7 @@ class _RobotLocationMap extends StatelessWidget {
               ],
             ),
           ),
+        /// دالة sized box.
           SizedBox(
             height: 180,
             child: FlutterMap(
@@ -333,12 +404,15 @@ class _RobotLocationMap extends StatelessWidget {
                 initialZoom: 17,
               ),
               children: [
+              /// دالة tile layer.
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.farmassistant.app',
                 ),
+              /// دالة marker layer.
                 MarkerLayer(
                   markers: [
+                  /// دالة marker.
                     Marker(
                       width: 52,
                       height: 52,
@@ -354,6 +428,7 @@ class _RobotLocationMap extends StatelessWidget {
               ],
             ),
           ),
+        /// دالة padding.
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
             child: Text(

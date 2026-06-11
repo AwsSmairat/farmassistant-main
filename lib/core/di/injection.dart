@@ -1,3 +1,15 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: injection.dart
+// المسار: core/di/injection.dart
+// الطبقة: core / di — حقن التبعيات
+//
+// ماذا يفعل؟
+//   تسجيل جميع الخدمات في GetIt.
+//
+// ماذا بداخله؟
+//   • setupInjection()
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:get_it/get_it.dart';
 
@@ -68,6 +80,7 @@ import '../../features/telemetry/data/datasources/farm_firestore_telemetry_datas
 
 final getIt = GetIt.instance;
 
+/// يُعد حقن التبعيات.
 Future<void> setupInjection() async {
   // Data sources
   getIt.registerLazySingleton<AuthRemoteDatasource>(
@@ -186,6 +199,7 @@ Future<void> setupInjection() async {
   );
   getIt.registerLazySingleton(
     () =>
+      /// دالة تحديث الملف الشخصي.
         UpdateProfile(getIt<AuthRepository>(), getIt<UserProfileRepository>()),
   );
   getIt.registerFactory<ProfileCubit>(
@@ -215,6 +229,7 @@ Future<void> setupInjection() async {
   // Sensors dashboard (Firestore realtime)
   getIt.registerLazySingleton<SensorsRemoteDatasource>(
     () =>
+      /// دالة المستشعرات بعيد مصدر بيانات تنفيذ.
         SensorsRemoteDatasourceImpl(getIt<FarmFirestoreTelemetryDatasource>()),
   );
   getIt.registerLazySingleton<SensorsRepository>(

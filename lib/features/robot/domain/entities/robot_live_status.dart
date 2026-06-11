@@ -15,6 +15,7 @@ import 'package:equatable/equatable.dart';
 
 /// لقطة حالة الروبوت من مستند Firestore: robot_status/{robotId}.
 class RobotLiveStatus extends Equatable {
+  /// دالة الروبوت مباشر الحالة.
   const RobotLiveStatus({
     this.online = false,
     this.battery,
@@ -59,6 +60,7 @@ class RobotLiveStatus extends Equatable {
   final bool exists;
 
   @override
+  /// يُرجع props.
   List<Object?> get props => [
         online,
         battery,

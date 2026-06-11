@@ -1,5 +1,18 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: signup_state.dart
+// المسار: features/auth/presentation/cubit/signup_state.dart
+// الطبقة: presentation / cubit — منطق الواجهة
+//
+// ماذا يفعل؟
+//   جزء من ميزة: المصادقة وتسجيل الدخول. شكل بيانات الحالة للواجهة.
+//
+// ماذا بداخله؟
+//   • SignupState
+//   • enum SignupStatus
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 part of 'signup_cubit.dart';
 
+/// تعداد إنشاء حساب الحالة.
 enum SignupStatus {
   initial,
   loading,
@@ -8,6 +21,7 @@ enum SignupStatus {
   googleNeedsProfile,
 }
 
+/// حالة واجهة إنشاء حساب.
 class SignupState extends Equatable {
   const SignupState._({
     required this.status,
@@ -40,14 +54,19 @@ class SignupState extends Equatable {
           user: user,
         );
 
+  /// حقل: الحالة.
   final SignupStatus status;
+  /// حقل: المستخدم.
   final AuthUser? user;
+  /// حقل: message.
   final String? message;
 
   /// When true after [SignupStatus.success], show email verification dialog (email/password signup).
+  /// حقل: show البريد verification حوار.
   final bool showEmailVerificationDialog;
 
   @override
+  /// يُرجع props.
   List<Object?> get props =>
       [status, user, message, showEmailVerificationDialog];
 }

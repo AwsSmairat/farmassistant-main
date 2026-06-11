@@ -1,8 +1,20 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: app_text_link.dart
+// المسار: core/widgets/app_text_link.dart
+// الطبقة: core / widgets — مكوّنات مشتركة
+//
+// ماذا يفعل؟
+//   جزء من البنية الأساسية للتطبيق.
+//
+// ماذا بداخله؟
+//   • AppTextLink
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-
-/// Text link in accent orange, no underline (e.g. "Forgot credential?").
+/// كلاس التطبيق نص رابط.
 class AppTextLink extends StatelessWidget {
+  /// دالة التطبيق نص رابط.
   const AppTextLink({
     super.key,
     required this.label,
@@ -10,11 +22,15 @@ class AppTextLink extends StatelessWidget {
     this.fontSize = 14,
   });
 
+  /// حقل: label.
   final String label;
+  /// حقل: on pressed.
   final VoidCallback onPressed;
+  /// حقل: font size.
   final double fontSize;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: onPressed,

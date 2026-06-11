@@ -25,6 +25,7 @@ import 'robot_live_camera_stream.dart';
 
 /// بطاقة الكاميرا المباشرة — iframe على الويب، Image.network على الجوال.
 class RobotLiveCameraCard extends StatefulWidget {
+  /// دالة الروبوت مباشر الكاميرا بطاقة.
   const RobotLiveCameraCard({
     super.key,
     required this.streamUrl,
@@ -38,9 +39,11 @@ class RobotLiveCameraCard extends StatefulWidget {
   final bool isConnected;
 
   @override
+  /// ينشئ الحالة.
   State<RobotLiveCameraCard> createState() => _RobotLiveCameraCardState();
 }
 
+/// حالة واجهة الروبوت مباشر الكاميرا بطاقة.
 class _RobotLiveCameraCardState extends State<RobotLiveCameraCard> {
   /// فترة إعادة المحاولة التلقائية على الجوال.
   static const _retryInterval = Duration(seconds: 4);
@@ -53,26 +56,31 @@ class _RobotLiveCameraCardState extends State<RobotLiveCameraCard> {
   bool _wasConnected = false;
 
   @override
+  /// يهيّئ الويدجت.
   void initState() {
     super.initState();
     _wasConnected = widget.isConnected;
   }
 
   @override
+  /// يستجيب لتغيّر خصائص الويدجت.
   void didUpdateWidget(covariant RobotLiveCameraCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     // إعادة التحميل عند تغيّر الرابط.
     if (oldWidget.streamUrl != widget.streamUrl) {
+    /// دالة داخلية: reload البث.
       _reloadStream();
     }
     // إعادة التحميل عند عودة اتصال الروبوت.
     if (!_wasConnected && widget.isConnected) {
+    /// دالة داخلية: reload البث.
       _reloadStream();
     }
     _wasConnected = widget.isConnected;
   }
 
   @override
+  /// ينظف الموارد.
   void dispose() {
     _retryTimer?.cancel();
     super.dispose();
@@ -81,6 +89,7 @@ class _RobotLiveCameraCardState extends State<RobotLiveCameraCard> {
   /// إعادة تهيئة البث (iframe جديد أو Image.network جديد).
   void _reloadStream() {
     _retryTimer?.cancel();
+  /// يعيّن الحالة.
     setState(() {
       _streamError = false;
       // على الويب لا ننتظر onLoad — نعرض iframe مباشرة.
@@ -92,10 +101,12 @@ class _RobotLiveCameraCardState extends State<RobotLiveCameraCard> {
   /// معالجة فشل البث (جوال فقط).
   void _onStreamError() {
     if (kIsWeb || _streamError) return;
+  /// يعيّن الحالة.
     setState(() => _streamError = true);
     _retryTimer?.cancel();
     _retryTimer = Timer.periodic(_retryInterval, (_) {
       if (!mounted || !_streamError) return;
+    /// دالة داخلية: reload البث.
       _reloadStream();
     });
   }
@@ -113,6 +124,7 @@ class _RobotLiveCameraCardState extends State<RobotLiveCameraCard> {
   }
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     final maxWidth = MediaQuery.sizeOf(context).width;
     final horizontalPad = maxWidth >= 600 ? 24.0 : 16.0;
@@ -128,10 +140,14 @@ class _RobotLiveCameraCardState extends State<RobotLiveCameraCard> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // عنوان البطاقة وزر إعادة المحاولة (جوال).
+          /// دالة صف.
             Row(
               children: [
+                /// دالة أيقونة.
                 const Icon(Icons.videocam, color: AppColors.primary, size: 20),
+                /// دالة sized box.
                 const SizedBox(width: 8),
+                /// دالة expanded.
                 const Expanded(
                   child: Text(
                     'Live Camera',
@@ -143,14 +159,17 @@ class _RobotLiveCameraCardState extends State<RobotLiveCameraCard> {
                   ),
                 ),
                 if (!kIsWeb && _streamError)
+                /// دالة نص زر.
                   TextButton(
                     onPressed: _reloadStream,
                     child: const Text('إعادة المحاولة'),
                   ),
               ],
             ),
+            /// دالة sized box.
             const SizedBox(height: 10),
             // منطقة العرض بنسبة 4:3.
+          /// دالة clip rrect.
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: AspectRatio(
@@ -158,6 +177,7 @@ class _RobotLiveCameraCardState extends State<RobotLiveCameraCard> {
                 child: ColoredBox(
                   color: AppColors.surfaceVariant.withValues(alpha: 0.45),
                   child: kIsWeb
+                      /// دالة الروبوت مباشر الكاميرا البث.
                       ? RobotLiveCameraStream(
                           key: ValueKey(
                             '${widget.streamUrl}#$_reloadToken',
@@ -166,10 +186,12 @@ class _RobotLiveCameraCardState extends State<RobotLiveCameraCard> {
                           reloadToken: _reloadToken,
                         )
                       : _streamError
+                          /// دالة داخلية: البث خطأ عرض.
                           ? _StreamErrorView(onRetry: _reloadStream)
                           : Stack(
                               fit: StackFit.expand,
                               children: [
+                              /// دالة الروبوت مباشر الكاميرا البث.
                                 RobotLiveCameraStream(
                                   streamUrl: widget.streamUrl,
                                   reloadToken: _reloadToken,
@@ -184,7 +206,9 @@ class _RobotLiveCameraCardState extends State<RobotLiveCameraCard> {
             ),
             // زر فتح البث في المتصفح (ويب فقط).
             if (kIsWeb) ...[
+              /// دالة sized box.
               const SizedBox(height: 8),
+            /// دالة align.
               Align(
                 alignment: Alignment.center,
                 child: TextButton.icon(
@@ -206,9 +230,11 @@ class _RobotLiveCameraCardState extends State<RobotLiveCameraCard> {
 
 /// مؤشر تحميل أثناء انتظار أول إطار (جوال).
 class _StreamLoadingView extends StatelessWidget {
+  /// دالة داخلية: البث تحميل عرض.
   const _StreamLoadingView();
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return const ColoredBox(
       color: AppColors.surface,
@@ -216,6 +242,7 @@ class _StreamLoadingView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+          /// دالة sized box.
             SizedBox(
               width: 32,
               height: 32,
@@ -224,7 +251,9 @@ class _StreamLoadingView extends StatelessWidget {
                 color: AppColors.primary,
               ),
             ),
+          /// دالة sized box.
             SizedBox(height: 12),
+          /// دالة نص.
             Text(
               'جاري الاتصال بالكاميرا…',
               style: TextStyle(
@@ -242,11 +271,14 @@ class _StreamLoadingView extends StatelessWidget {
 
 /// شاشة خطأ مع زر إعادة الاتصال (جوال).
 class _StreamErrorView extends StatelessWidget {
+  /// دالة داخلية: البث خطأ عرض.
   const _StreamErrorView({required this.onRetry});
 
+  /// حقل: on retry.
   final VoidCallback onRetry;
 
   @override
+  /// يبني شجرة الواجهة (Widget).
   Widget build(BuildContext context) {
     return ColoredBox(
       color: AppColors.surface,
@@ -256,12 +288,15 @@ class _StreamErrorView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              /// دالة أيقونة.
               const Icon(
                 Icons.videocam_off_outlined,
                 color: AppColors.error,
                 size: 40,
               ),
+              /// دالة sized box.
               const SizedBox(height: 10),
+              /// دالة نص.
               const Text(
                 'تعذر عرض بث الكاميرا',
                 textAlign: TextAlign.center,
@@ -271,7 +306,9 @@ class _StreamErrorView extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
+              /// دالة sized box.
               const SizedBox(height: 6),
+              /// دالة نص.
               const Text(
                 'تحقق من تشغيل الروبوت والشبكة المحلية',
                 textAlign: TextAlign.center,
@@ -281,6 +318,7 @@ class _StreamErrorView extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
+              /// دالة sized box.
               const SizedBox(height: 14),
               FilledButton.icon(
                 onPressed: onRetry,

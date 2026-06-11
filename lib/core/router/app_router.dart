@@ -1,3 +1,15 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: app_router.dart
+// المسار: core/router/app_router.dart
+// الطبقة: core / router — التنقل
+//
+// ماذا يفعل؟
+//   تعريف مسارات التطبيق.
+//
+// ماذا بداخله؟
+//   • AppRouter
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import 'package:flutter/foundation.dart' show Listenable;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -18,9 +30,11 @@ import '../../features/profile/presentation/pages/settings_page.dart';
 import '../../features/robot/presentation/cubit/robot_control_cubit.dart';
 import '../../features/robot/presentation/pages/robot_control_page.dart';
 
+/// كلاس التطبيق التوجيه.
 class AppRouter {
   AppRouter._();
 
+  /// ينشئ.
   static GoRouter create({Listenable? refreshListenable}) {
     return GoRouter(
       refreshListenable: refreshListenable,
@@ -44,6 +58,7 @@ class AppRouter {
         return null;
       },
       routes: [
+      /// دالة go route.
         GoRoute(
           path: '/login',
           builder: (context, state) => BlocProvider(
@@ -51,6 +66,7 @@ class AppRouter {
             child: const LoginPage(),
           ),
         ),
+      /// دالة go route.
         GoRoute(
           path: '/signup',
           builder: (context, state) => BlocProvider(
@@ -58,6 +74,7 @@ class AppRouter {
             child: const SignupPage(),
           ),
         ),
+      /// دالة go route.
         GoRoute(
           path: '/forgot-password',
           builder: (context, state) => BlocProvider(
@@ -65,14 +82,17 @@ class AppRouter {
             child: const ForgotPasswordPage(),
           ),
         ),
+      /// دالة go route.
         GoRoute(
           path: '/',
           builder: (context, state) {
             final tab = state.uri.queryParameters['tab'];
             final index = AppRouter._tabToIndex(tab);
+            /// دالة الرئيسية الهيكل الرئيسي صفحة.
             return HomeShellPage(initialIndex: index);
           },
         ),
+      /// دالة go route.
         GoRoute(
           path: '/diagnosis',
           builder: (context, state) => BlocProvider(
@@ -80,6 +100,7 @@ class AppRouter {
             child: const DiagnosisHistoryPage(),
           ),
         ),
+      /// دالة go route.
         GoRoute(
           path: '/robot-control',
           builder: (context, state) => BlocProvider(
@@ -87,10 +108,12 @@ class AppRouter {
             child: const RobotControlPage(showBackButton: true),
           ),
         ),
+      /// دالة go route.
         GoRoute(
           path: '/settings',
           builder: (context, state) => const SettingsPage(),
         ),
+      /// دالة go route.
         GoRoute(
           path: '/privacy-policy',
           builder: (context, state) => const PrivacyPolicyPage(),
@@ -99,7 +122,9 @@ class AppRouter {
     );
   }
 
+  /// دالة داخلية: tab to index.
   static int _tabToIndex(String? tab) {
+  /// دالة switch.
     switch (tab) {
       case 'robot':
         return 2;

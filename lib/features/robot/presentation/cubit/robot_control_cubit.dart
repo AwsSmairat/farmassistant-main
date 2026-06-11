@@ -27,6 +27,7 @@ import 'robot_control_state.dart';
 class RobotControlCubit extends Cubit<RobotControlState> {
   RobotControlCubit(this._commands) : super(const RobotControlState());
 
+  /// حقل: أوامر.
   final RobotCommandService _commands;
   StreamSubscription<RobotLiveStatus>? _statusSub;
 
@@ -48,6 +49,7 @@ class RobotControlCubit extends Cubit<RobotControlState> {
 
   /// تحديث الحالة عند وصول لقطة جديدة من Firestore.
   void _onStatus(RobotLiveStatus status) {
+  /// يصدّر حالة جديدة.
     emit(
       state.copyWith(
         isFirestoreConnected: true,
@@ -68,6 +70,7 @@ class RobotControlCubit extends Cubit<RobotControlState> {
 
   /// تعيين حالة المضخة وإرسالها إلى Firestore.
   Future<void> setPump(bool on) async {
+  /// يصدّر حالة جديدة.
     emit(state.copyWith(waterPumpOn: on, clearError: true));
     await _run(() => _commands.sendPump(on));
   }
@@ -78,6 +81,7 @@ class RobotControlCubit extends Cubit<RobotControlState> {
   /// تبديل الوضع التلقائي.
   Future<void> toggleAutoMode() async {
     final next = !state.autoModeOn;
+  /// يصدّر حالة جديدة.
     emit(state.copyWith(autoModeOn: next, clearError: true));
     await _run(() => _commands.sendAutoMode(next));
   }
@@ -88,6 +92,7 @@ class RobotControlCubit extends Cubit<RobotControlState> {
   /// تنفيذ أمر مع مؤشر تحميل ومعالجة الأخطاء.
   Future<void> _run(Future<void> Function() action) async {
     if (state.isLoading) return;
+  /// يصدّر حالة جديدة.
     emit(state.copyWith(isLoading: true, clearError: true));
     try {
       await action();
@@ -103,6 +108,7 @@ class RobotControlCubit extends Cubit<RobotControlState> {
   }
 
   @override
+  /// يغلق.
   Future<void> close() {
     _statusSub?.cancel();
     return super.close();

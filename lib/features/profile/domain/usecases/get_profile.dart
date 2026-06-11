@@ -1,15 +1,29 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: get_profile.dart
+// المسار: features/profile/domain/usecases/get_profile.dart
+// الطبقة: domain / usecases — حالة استخدام
+//
+// ماذا يفعل؟
+//   جزء من ميزة: الملف الشخصي. عملية منطقية واحدة (Use Case).
+//
+// ماذا بداخله؟
+//   • GetProfile
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//
 import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../../auth/domain/repositories/user_profile_repository.dart';
 import '../../../../core/error/app_exceptions.dart';
 import '../entities/profile.dart';
-
-/// Loads the current user's profile (from auth + user_profiles).
+/// كلاس جلب الملف الشخصي.
 class GetProfile {
   GetProfile(this._authRepository, this._userProfileRepository);
 
+  /// حقل: المصادقة مستودع.
   final AuthRepository _authRepository;
+  /// حقل: المستخدم الملف الشخصي مستودع.
   final UserProfileRepository _userProfileRepository;
 
+  /// دالة call.
   Future<Profile> call() async {
     final user = _authRepository.currentUser;
     if (user == null) throw Exception('يجب تسجيل الدخول');
@@ -18,6 +32,7 @@ class GetProfile {
     try {
       final profileData = await _userProfileRepository.getProfileByUid(uid);
       if (profileData == null) {
+        /// دالة استثناء.
         throw Exception('الملف الشخصي غير موجود');
       }
 
