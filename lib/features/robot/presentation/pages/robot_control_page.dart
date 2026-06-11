@@ -1,210 +1,210 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../domain/usecases/dispatch_robot_firestore_commands.dart';
 import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../../../auth/presentation/widgets/logout_icon_button.dart';
+import '../cubit/robot_control_cubit.dart';
+import '../cubit/robot_control_state.dart';
+import '../widgets/robot_live_camera_card.dart';
 
-/// Robot control: Start/Stop, Water Pump, Auto Mode, arrows, camera, GPS.
-class RobotControlPage extends StatefulWidget {
+/// شاشة التحكم بالروبوت: كاميرا، GPS، مضخة، وضع تلقائي، ولوحة اتجاهات.
+class RobotControlPage extends StatelessWidget {
   const RobotControlPage({super.key, this.showBackButton = true});
 
-  /// When false (e.g. inside HomeShell), leading back button is hidden.
+  /// عند false (داخل HomeShell) يُخفى زر الرجوع.
   final bool showBackButton;
 
   @override
-  State<RobotControlPage> createState() => _RobotControlPageState();
-}
-
-class _RobotControlPageState extends State<RobotControlPage> {
-  bool _waterPumpOn = false;
-  bool _autoModeOn = false;
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: LiquidGlassAppBar(
-        title: const Text('التحكم بالروبوت'),
-        automaticallyImplyLeading: widget.showBackButton,
-        leading: widget.showBackButton
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => context.pop(),
-              )
-            : null,
-        actions: const [
-          LogoutIconButton(),
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _GpsBar(),
-              const SizedBox(height: 12),
-              const _CameraView(),
-              const SizedBox(height: 16),
-              _PrimaryControlRow(
-                autoModeOn: _autoModeOn,
-                onAutoModeTap: _onAutoModeTap,
-                onStop: _onStopPressed,
-              ),
-              const SizedBox(height: 12),
-              _WaterPumpRow(
-                isOn: _waterPumpOn,
-                onChanged: _onPumpChanged,
-                onTap: _onPumpToggle,
-              ),
-              const SizedBox(height: 16),
-              const _DirectionPad(),
-              const SizedBox(height: 24),
-            ],
+    return BlocListener<RobotControlCubit, RobotControlState>(
+      // عرض رسائل الخطأ في SnackBar.
+      listenWhen: (p, c) =>
+          c.errorMessage != null && c.errorMessage != p.errorMessage,
+      listener: (context, state) {
+        final msg = state.errorMessage;
+        if (msg == null) return;
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(msg),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppColors.surface,
           ),
-        ),
+        );
+      },
+      child: BlocBuilder<RobotControlCubit, RobotControlState>(
+        builder: (context, state) {
+          final cubit = context.read<RobotControlCubit>();
+          return Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: LiquidGlassAppBar(
+              title: const Text('التحكم بالروبوت'),
+              automaticallyImplyLeading: showBackButton,
+              leading: showBackButton
+                  ? IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => context.pop(),
+                    )
+                  : null,
+              actions: const [
+                LogoutIconButton(),
+              ],
+            ),
+            body: SafeArea(
+              child: Stack(
+                children: [
+                  SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        // بث الكاميرا المباشر من الراسبيري باي.
+                        RobotLiveCameraCard(
+                          streamUrl: state.cameraStreamUrl,
+                          isConnected:
+                              state.isFirestoreConnected && state.robotOnline,
+                        ),
+                        const SizedBox(height: 12),
+                        _GpsBar(
+                          gpsLabel: state.gpsLabel,
+                          firestoreConnected: state.isFirestoreConnected,
+                          robotOnline: state.robotOnline,
+                          onRefresh: cubit.requestGpsRefresh,
+                        ),
+                        const SizedBox(height: 16),
+                        _PrimaryControlRow(
+                          autoModeOn: state.autoModeOn,
+                          onAutoModeTap: state.isLoading
+                              ? null
+                              : cubit.toggleAutoMode,
+                          onStop: state.isLoading ? null : cubit.sendStop,
+                        ),
+                        const SizedBox(height: 12),
+                        _WaterPumpRow(
+                          isOn: state.waterPumpOn,
+                          onChanged: state.isLoading ? null : cubit.setPump,
+                          onTap: state.isLoading ? null : cubit.togglePump,
+                        ),
+                        const SizedBox(height: 16),
+                        _DirectionPad(
+                          enabled: !state.isLoading,
+                          onMove: cubit.sendMove,
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+                  // شريط تقدم أثناء إرسال أمر إلى Firestore.
+                  if (state.isLoading)
+                    const Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: LinearProgressIndicator(
+                        minHeight: 3,
+                        color: AppColors.primary,
+                        backgroundColor: Colors.transparent,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
-  }
-
-  void _showSnack(String msg) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.surface,
-        duration: const Duration(milliseconds: 500),
-      ),
-    );
-  }
-
-  Future<void> _onStopPressed() async {
-    try {
-      await getIt<DispatchRobotFirestoreCommands>().sendMove('stop');
-      _showSnack('Stop');
-    } catch (e) {
-      _showSnack('تعذر إرسال أمر الإيقاف');
-    }
-  }
-
-  Future<void> _onAutoModeTap() async {
-    final next = !_autoModeOn;
-    setState(() => _autoModeOn = next);
-    if (!next) return;
-    try {
-      await getIt<DispatchRobotFirestoreCommands>().requestScan();
-      _showSnack('طلب فحص');
-    } catch (_) {
-      _showSnack('تعذر إرسال طلب الفحص');
-    }
-  }
-
-  Future<void> _onPumpChanged(bool v) async {
-    setState(() => _waterPumpOn = v);
-    try {
-      await getIt<DispatchRobotFirestoreCommands>().sendPump(v);
-    } catch (_) {
-      if (mounted) _showSnack('تعذر تحديث حالة المضخة');
-    }
-  }
-
-  Future<void> _onPumpToggle() async {
-    final next = !_waterPumpOn;
-    await _onPumpChanged(next);
   }
 }
 
+/// شريط GPS مع مؤشر الاتصال — الضغط يطلب تحديث الإحداثيات.
 class _GpsBar extends StatelessWidget {
+  const _GpsBar({
+    required this.gpsLabel,
+    required this.firestoreConnected,
+    required this.robotOnline,
+    required this.onRefresh,
+  });
+
+  final String gpsLabel;
+  final bool firestoreConnected;
+  final bool robotOnline;
+  final VoidCallback onRefresh;
+
+  String get _subtitle {
+    if (!firestoreConnected) return 'جاري الاتصال بـ Firestore…';
+    if (!robotOnline) return 'الروبوت غير متصل';
+    return gpsLabel;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: LiquidGlassPanel(
-        borderRadius: LiquidGlassTokens.radiusSm,
-        blurSigma: LiquidGlassTokens.blurMedium,
-        accentBorder: AppColors.info,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.info.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.gps_fixed, color: AppColors.info, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'GPS',
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onRefresh,
+          borderRadius: BorderRadius.circular(LiquidGlassTokens.radiusSm),
+          child: LiquidGlassPanel(
+            borderRadius: LiquidGlassTokens.radiusSm,
+            blurSigma: LiquidGlassTokens.blurMedium,
+            accentBorder: firestoreConnected && robotOnline
+                ? AppColors.info
+                : AppColors.warning,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.info.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  const SizedBox(height: 2),
-                  const Text(
-                    '31.95° N, 35.93° E',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  child: Icon(
+                    Icons.gps_fixed,
+                    color: firestoreConnected && robotOnline
+                        ? AppColors.info
+                        : AppColors.warning,
+                    size: 22,
                   ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CameraView extends StatelessWidget {
-  const _CameraView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: LiquidGlassPanel(
-          borderRadius: LiquidGlassTokens.radiusSm,
-          blurSigma: LiquidGlassTokens.blurMedium,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Positioned.fill(
-                child: ColoredBox(
-                  color: AppColors.surfaceVariant.withValues(alpha: 0.35),
                 ),
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.videocam, size: 48, color: AppColors.textMuted),
-                  const SizedBox(height: 8),
-                  Text(
-                    'الكاميرا',
-                    style: TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          const Text(
+                            'GPS',
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          _ConnectionDot(
+                            firestoreConnected: firestoreConnected,
+                            robotOnline: robotOnline,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _subtitle,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -212,6 +212,35 @@ class _CameraView extends StatelessWidget {
   }
 }
 
+/// نقطة ملوّنة: أصفر=Firestore، أحمر=روبوت غير متصل، أخضر=متصل.
+class _ConnectionDot extends StatelessWidget {
+  const _ConnectionDot({
+    required this.firestoreConnected,
+    required this.robotOnline,
+  });
+
+  final bool firestoreConnected;
+  final bool robotOnline;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color;
+    if (!firestoreConnected) {
+      color = AppColors.warning;
+    } else if (!robotOnline) {
+      color = AppColors.error;
+    } else {
+      color = AppColors.success;
+    }
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
+  }
+}
+
+/// صف الأزرار الرئيسية: الوضع التلقائي وإيقاف الطوارئ.
 class _PrimaryControlRow extends StatelessWidget {
   const _PrimaryControlRow({
     required this.autoModeOn,
@@ -220,8 +249,8 @@ class _PrimaryControlRow extends StatelessWidget {
   });
 
   final bool autoModeOn;
-  final VoidCallback onAutoModeTap;
-  final VoidCallback onStop;
+  final VoidCallback? onAutoModeTap;
+  final VoidCallback? onStop;
 
   @override
   Widget build(BuildContext context) {
@@ -252,6 +281,7 @@ class _PrimaryControlRow extends StatelessWidget {
   }
 }
 
+/// زر إجراء ملوّن (Auto Mode / Stop).
 class _ActionButton extends StatelessWidget {
   const _ActionButton({
     required this.label,
@@ -263,7 +293,7 @@ class _ActionButton extends StatelessWidget {
   final String label;
   final IconData icon;
   final Color color;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -297,6 +327,7 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
+/// بطاقة مضخة المياه مع مفتاح تشغيل/إيقاف.
 class _WaterPumpRow extends StatelessWidget {
   const _WaterPumpRow({
     required this.isOn,
@@ -305,8 +336,8 @@ class _WaterPumpRow extends StatelessWidget {
   });
 
   final bool isOn;
-  final ValueChanged<bool> onChanged;
-  final VoidCallback onTap;
+  final ValueChanged<bool>? onChanged;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -405,8 +436,15 @@ class _WaterPumpRow extends StatelessWidget {
   }
 }
 
+/// لوحة دائرية للتحكم بالاتجاهات (أمام، خلف، يسار، يمين).
 class _DirectionPad extends StatelessWidget {
-  const _DirectionPad();
+  const _DirectionPad({
+    required this.enabled,
+    required this.onMove,
+  });
+
+  final bool enabled;
+  final Future<void> Function(String direction) onMove;
 
   @override
   Widget build(BuildContext context) {
@@ -452,7 +490,9 @@ class _DirectionPad extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: AppColors.surfaceVariant.withValues(alpha: 0.55),
-                      border: Border.all(color: AppColors.border.withValues(alpha: 0.7)),
+                      border: Border.all(
+                        color: AppColors.border.withValues(alpha: 0.7),
+                      ),
                     ),
                   ),
                   Container(
@@ -463,14 +503,19 @@ class _DirectionPad extends StatelessWidget {
                       color: AppColors.surfaceVariant,
                       border: Border.all(color: AppColors.border),
                     ),
-                    child: const Icon(Icons.smart_toy, color: AppColors.primary, size: 32),
+                    child: const Icon(
+                      Icons.smart_toy,
+                      color: AppColors.primary,
+                      size: 32,
+                    ),
                   ),
                   Positioned(
                     top: 18,
                     child: _ArrowButton(
                       icon: Icons.keyboard_arrow_up_rounded,
                       semanticLabel: 'أمام',
-                      onPressed: () => _fireMove(context, 'forward'),
+                      enabled: enabled,
+                      onPressed: () => onMove('forward'),
                     ),
                   ),
                   Positioned(
@@ -478,7 +523,8 @@ class _DirectionPad extends StatelessWidget {
                     child: _ArrowButton(
                       icon: Icons.keyboard_arrow_down_rounded,
                       semanticLabel: 'خلف',
-                      onPressed: () => _fireMove(context, 'backward'),
+                      enabled: enabled,
+                      onPressed: () => onMove('backward'),
                     ),
                   ),
                   Positioned(
@@ -486,7 +532,8 @@ class _DirectionPad extends StatelessWidget {
                     child: _ArrowButton(
                       icon: Icons.keyboard_arrow_left_rounded,
                       semanticLabel: 'يسار',
-                      onPressed: () => _fireMove(context, 'left'),
+                      enabled: enabled,
+                      onPressed: () => onMove('left'),
                     ),
                   ),
                   Positioned(
@@ -494,7 +541,8 @@ class _DirectionPad extends StatelessWidget {
                     child: _ArrowButton(
                       icon: Icons.keyboard_arrow_right_rounded,
                       semanticLabel: 'يمين',
-                      onPressed: () => _fireMove(context, 'right'),
+                      enabled: enabled,
+                      onPressed: () => onMove('right'),
                     ),
                   ),
                 ],
@@ -505,43 +553,21 @@ class _DirectionPad extends StatelessWidget {
       ),
     );
   }
-
-  Future<void> _fireMove(BuildContext context, String direction) async {
-    try {
-      await getIt<DispatchRobotFirestoreCommands>().sendMove(direction);
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(direction),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: AppColors.surface,
-          duration: const Duration(milliseconds: 400),
-        ),
-      );
-    } catch (_) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('تعذر إرسال أمر الحركة'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: AppColors.surface,
-        ),
-      );
-    }
-  }
 }
 
+/// زر سهم واحد في لوحة الاتجاهات.
 class _ArrowButton extends StatelessWidget {
   const _ArrowButton({
     required this.icon,
     required this.semanticLabel,
     required this.onPressed,
+    this.enabled = true,
   });
 
   final IconData icon;
   final String semanticLabel;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -551,7 +577,7 @@ class _ArrowButton extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onPressed,
+          onTap: enabled ? onPressed : null,
           customBorder: const CircleBorder(),
           child: Ink(
             width: 62,
@@ -568,7 +594,11 @@ class _ArrowButton extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(icon, color: AppColors.primary, size: 36),
+            child: Icon(
+              icon,
+              color: enabled ? AppColors.primary : AppColors.textMuted,
+              size: 36,
+            ),
           ),
         ),
       ),

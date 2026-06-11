@@ -15,6 +15,7 @@ import '../../features/diagnosis/presentation/pages/diagnosis_history_page.dart'
 import '../../features/home/presentation/pages/home_shell_page.dart';
 import '../../features/profile/presentation/pages/privacy_policy_page.dart';
 import '../../features/profile/presentation/pages/settings_page.dart';
+import '../../features/robot/presentation/cubit/robot_control_cubit.dart';
 import '../../features/robot/presentation/pages/robot_control_page.dart';
 
 class AppRouter {
@@ -81,8 +82,10 @@ class AppRouter {
         ),
         GoRoute(
           path: '/robot-control',
-          builder: (context, state) =>
-              const RobotControlPage(showBackButton: true),
+          builder: (context, state) => BlocProvider(
+            create: (_) => getIt<RobotControlCubit>(),
+            child: const RobotControlPage(showBackButton: true),
+          ),
         ),
         GoRoute(
           path: '/settings',

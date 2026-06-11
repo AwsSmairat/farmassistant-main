@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../core/layout/responsive_layout.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/liquid_glass/liquid_glass.dart';
 import '../../../ai_plant_diagnosis/presentation/widgets/ai_diagnosis_shell_layers.dart';
 import '../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
+import '../../../robot/presentation/cubit/robot_control_cubit.dart';
 import '../../../robot/presentation/pages/robot_control_page.dart';
 import '../../../sensors/presentation/pages/sensors_page.dart';
 import 'dashboard_page.dart';
@@ -43,7 +46,11 @@ class _HomeShellPageState extends State<HomeShellPage> {
     return [
       DashboardPage(onNavigateToRobotControl: onNavigateToRobot),
       const SensorsPage(),
-      const RobotControlPage(showBackButton: false),
+      // تبويب الروبوت: Cubit مستقل يستمع لـ robot_status ويرسل الأوامر.
+      BlocProvider(
+        create: (_) => getIt<RobotControlCubit>(),
+        child: const RobotControlPage(showBackButton: false),
+      ),
       const NotificationsPage(),
       const ProfilePage(),
     ];

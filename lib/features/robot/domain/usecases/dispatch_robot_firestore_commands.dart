@@ -1,16 +1,26 @@
-import '../../../telemetry/data/datasources/farm_firestore_telemetry_datasource.dart';
+import '../../data/services/robot_command_service.dart';
 
-/// Writes control intents to Firestore `commands/{robotId}` (merge writes).
+/// حالة استخدام: إرسال أوامر التحكم إلى robot_commands/{robotId} (دمج merge).
 class DispatchRobotFirestoreCommands {
-  DispatchRobotFirestoreCommands(this._telemetry);
+  DispatchRobotFirestoreCommands(this._commands);
 
-  final FarmFirestoreTelemetryDatasource _telemetry;
+  final RobotCommandService _commands;
 
-  Future<void> sendMove(String direction) => _telemetry.writeMove(direction);
+  /// إرسال أمر حركة: forward | backward | left | right | stop.
+  Future<void> sendMove(String direction) => _commands.sendMove(direction);
 
-  Future<void> sendPump(bool on) => _telemetry.writePump(on);
+  /// تشغيل أو إيقاف مضخة المياه.
+  Future<void> sendPump(bool on) => _commands.sendPump(on);
 
-  Future<void> sendServo(String direction) => _telemetry.writeServo(direction);
+  /// تفعيل أو إلغاء الوضع التلقائي.
+  Future<void> sendAutoMode(bool on) => _commands.sendAutoMode(on);
 
-  Future<void> requestScan() => _telemetry.writeScanRequest();
+  /// طلب تحديث إحداثيات GPS من الروبوت.
+  Future<void> requestGpsRefresh() => _commands.requestGpsRefresh();
+
+  @Deprecated('استخدم sendMove للتحكم بالاتجاه')
+  Future<void> sendServo(String direction) => sendMove(direction);
+
+  @Deprecated('استخدم sendAutoMode بدلاً منه')
+  Future<void> requestScan() => sendAutoMode(true);
 }

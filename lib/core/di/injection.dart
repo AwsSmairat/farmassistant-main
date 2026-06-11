@@ -55,7 +55,9 @@ import '../../features/profile/data/repositories/privacy_policy_repository_impl.
 import '../../features/profile/domain/repositories/privacy_policy_repository.dart';
 import '../../features/profile/presentation/cubit/privacy_policy_cubit.dart';
 import '../../features/profile/presentation/cubit/profile_cubit.dart';
+import '../../features/robot/data/services/robot_command_service.dart';
 import '../../features/robot/domain/usecases/dispatch_robot_firestore_commands.dart';
+import '../../features/robot/presentation/cubit/robot_control_cubit.dart';
 import '../../features/sensors/data/datasources/sensors_remote_datasource.dart';
 import '../../features/sensors/data/datasources/sensors_remote_datasource_impl.dart';
 import '../../features/sensors/data/repositories/sensors_repository_impl.dart';
@@ -126,10 +128,13 @@ Future<void> setupInjection() async {
     () => ForgotPasswordCubit(getIt<SendPasswordReset>()),
   );
 
+  // الروبوت: خدمة Firestore + حالة استخدام الأوامر + Cubit شاشة التحكم.
+  getIt.registerLazySingleton<RobotCommandService>(() => RobotCommandService());
   getIt.registerLazySingleton(
-    () => DispatchRobotFirestoreCommands(
-      getIt<FarmFirestoreTelemetryDatasource>(),
-    ),
+    () => DispatchRobotFirestoreCommands(getIt<RobotCommandService>()),
+  );
+  getIt.registerFactory<RobotControlCubit>(
+    () => RobotControlCubit(getIt<RobotCommandService>())..start(),
   );
 
   // Home / Dashboard (Firestore realtime)
