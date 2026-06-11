@@ -1,3 +1,20 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: robot_control_state.dart
+// الطبقة: presentation / cubit
+
+// ماذا يفعل؟
+//   يحدد شكل الحالة التي تعرضها شاشة التحكم بالروبوت
+//   (ما يقرأه BlocBuilder من Cubit).
+
+// ماذا بداخله؟
+//   • RobotControlState — حالة الشاشة
+//   • waterPumpOn, autoModeOn, isLoading, isFirestoreConnected
+//   • status — لقطة RobotLiveStatus من Firestore
+//   • gpsLabel, errorMessage
+//   • robotOnline — هل الروبوت متصل؟
+//   • cameraStreamUrl — رابط بث الكاميرا المحلول
+//   • copyWith() — نسخ الحالة مع تعديلات
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 import 'package:equatable/equatable.dart';
 
 import '../../domain/robot_camera_urls.dart';

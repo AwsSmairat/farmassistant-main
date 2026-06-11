@@ -1,3 +1,16 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: robot_live_status.dart
+// الطبقة: domain / entities
+
+// ماذا يفعل؟
+//   يمثل شكل بيانات حالة الروبوت كما تأتي من Firestore
+//   (مستند robot_status/robot_001).
+
+// ماذا بداخله؟
+//   • RobotLiveStatus — كيان الحالة مع الحقول:
+//     online, battery, tankLevel, moisture, gpsLabel,
+//     currentMove, pump, autoMode, cameraUrl, exists
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 import 'package:equatable/equatable.dart';
 
 /// لقطة حالة الروبوت من مستند Firestore: robot_status/{robotId}.

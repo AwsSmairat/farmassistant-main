@@ -1,3 +1,20 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: robot_command_service.dart
+// الطبقة: data / services
+
+// ماذا يفعل؟
+//   جسر الاتصال بين التطبيق و Firestore للروبوت.
+//   يكتب أوامر التحكم في robot_commands/robot_001
+//   ويستمع لحالة الروبوت من robot_status/robot_001.
+
+// ماذا بداخله؟
+//   • RobotCommandService — الخدمة الرئيسية
+//   • watchRobotStatus() — بث مباشر لتحديثات الحالة
+//   • sendMove / sendPump / sendAutoMode / requestGpsRefresh — إرسال الأوامر
+//   • _merge() — دمج الحقول مع updatedAt في Firestore
+//   • _parseStatus() — تحويل مستند Firestore إلى RobotLiveStatus
+//   • _formatGps() — تنسيق إحداثيات GPS للعرض
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../telemetry/data/firestore_paths.dart';

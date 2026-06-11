@@ -1,3 +1,17 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: robot_live_camera_stream_io.dart
+// الطبقة: presentation / widgets (Android / iOS)
+
+// ماذا يفعل؟
+//   يعرض بث الكاميرا على الجوال عبر Image.network.
+//   (MJPEG قد لا يعمل بسلاسة على كل الأجهزة).
+
+// ماذا بداخله؟
+//   • RobotLiveCameraStream — StatelessWidget
+//   • Image.network — تحميل البث مع fit: cover
+//   • frameBuilder — إشعار الواجهة عند أول إطار (onReady)
+//   • errorBuilder — إشعار الواجهة عند الفشل (onError)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 import 'package:flutter/material.dart';
 
 /// Android/iOS: عرض البث عبر Image.network (قد يكون محدوداً مع MJPEG).

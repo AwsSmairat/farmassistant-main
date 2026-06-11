@@ -1,3 +1,20 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: robot_control_cubit.dart
+// الطبقة: presentation / cubit
+
+// ماذا يفعل؟
+//   يدير منطق شاشة التحكم بالروبوت:
+//   يستمع لحالة Firestore ويرسل الأوامر ويحدّث الواجهة.
+
+// ماذا بداخله؟
+//   • RobotControlCubit — Cubit الرئيسي (Bloc)
+//   • start() — بدء الاستماع لـ robot_status
+//   • sendMove / sendStop — أوامر الحركة
+//   • setPump / togglePump — التحكم بالمضخة
+//   • toggleAutoMode — الوضع التلقائي
+//   • requestGpsRefresh() — تحديث GPS
+//   • _run() — تنفيذ أمر مع مؤشر تحميل ومعالجة أخطاء
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';

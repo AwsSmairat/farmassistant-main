@@ -1,3 +1,18 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: robot_live_camera_card.dart
+// الطبقة: presentation / widgets
+
+// ماذا يفعل؟
+//   بطاقة واجهة «Live Camera» — تعرض بث MJPEG
+//   مع إعادة محاولة على الجوال وزر فتح في المتصفح على الويب.
+
+// ماذا بداخله؟
+//   • RobotLiveCameraCard — البطاقة الرئيسية (StatefulWidget)
+//   • _reloadStream() — إعادة تحميل البث
+//   • _StreamLoadingView — مؤشر تحميل (جوال)
+//   • _StreamErrorView — شاشة خطأ + إعادة اتصال (جوال)
+//   • على الويب: iframe مباشر + زر «فتح الكاميرا في المتصفح»
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 import 'dart:async';
 
 import 'package:flutter/foundation.dart' show kIsWeb;

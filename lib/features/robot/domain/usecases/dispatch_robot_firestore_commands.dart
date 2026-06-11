@@ -1,3 +1,18 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: dispatch_robot_firestore_commands.dart
+// الطبقة: domain / usecases
+
+// ماذا يفعل؟
+//   طبقة حالة استخدام (Use Case) تغلف RobotCommandService
+//   لتوفير واجهة نظيفة لإرسال أوامر الروبوت.
+
+// ماذا بداخله؟
+//   • DispatchRobotFirestoreCommands — الكلاس الرئيسي
+//   • sendMove() — حركة: forward | backward | left | right | stop
+//   • sendPump() — تشغيل/إيقاف المضخة
+//   • sendAutoMode() — الوضع التلقائي
+//   • requestGpsRefresh() — طلب تحديث GPS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 import '../../data/services/robot_command_service.dart';
 
 /// حالة استخدام: إرسال أوامر التحكم إلى robot_commands/{robotId} (دمج merge).

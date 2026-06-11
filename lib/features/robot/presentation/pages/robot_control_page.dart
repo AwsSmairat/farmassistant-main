@@ -1,3 +1,22 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: robot_control_page.dart
+// الطبقة: presentation / pages
+
+// ماذا يفعل؟
+//   الشاشة الكاملة للتحكم بالروبوت — تجمع الكاميرا والأزرار
+//   ولوحة الاتجاهات وتعرضها للمستخدم.
+
+// ماذا بداخله؟
+//   • RobotControlPage — الصفحة الرئيسية (BlocBuilder + Scaffold)
+//   • RobotLiveCameraCard — بث الكاميرا في الأعلى
+//   • _GpsBar — شريط GPS مع مؤشر الاتصال
+//   • _ConnectionDot — نقطة ملوّنة لحالة الاتصال
+//   • _PrimaryControlRow — Auto Mode + Stop
+//   • _ActionButton — زر إجراء ملوّن
+//   • _WaterPumpRow — بطاقة مضخة المياه + Switch
+//   • _DirectionPad — لوحة دائرية للاتجاهات
+//   • _ArrowButton — زر سهم واحد
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';

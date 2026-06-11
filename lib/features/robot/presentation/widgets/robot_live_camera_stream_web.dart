@@ -1,3 +1,17 @@
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// الملف: robot_live_camera_stream_web.dart
+// الطبقة: presentation / widgets (Flutter Web فقط)
+
+// ماذا يفعل؟
+//   يعرض بث MJPEG على Flutter Web عبر iframe مدمج
+//   باستخدام HtmlElementView و platformViewRegistry.
+
+// ماذا بداخله؟
+//   • RobotLiveCameraStream — StatefulWidget للويب
+//   • _registerView() — تسجيل iframe في platformViewRegistry
+//   • IFrameElement — src = رابط الكاميرا، بدون حدود، 100% عرض/ارتفاع
+//   • DivElement — غلاف لملء الحاوية
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 import 'dart:html' as html;
 import 'dart:ui_web' as ui_web;
 
